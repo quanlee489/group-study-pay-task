@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GroupStudy Pay</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff; display: flex;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 100;
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      padding: 8px 0; cursor: pointer; color: #666; transition: color 0.2s;
+      text-decoration: none; font-size: 12px;
+    }
+    .nav-item.active { color: #03a9f4; }
+    .nav-item .material-icons { font-size: 24px; margin-bottom: 2px; }
+
+    .screen { display: none; flex: 1; padding-bottom: 70px; }
+    .screen.active { display: flex; flex-direction: column; }
+
+    .app-bar {
+      background: #b3e5fc; padding: 16px; text-align: center;
+      font-size: 18px; font-weight: 700; position: sticky; top: 0; z-index: 10;
+    }
+
+    .card {
+      background: #fff; border-radius: 12px; padding: 16px; margin: 8px 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+
+    .input-group { margin-bottom: 12px; position: relative; }
+    .input-group label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+    .input-group input, .input-group select {
+      width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;
+      font-size: 14px; outline: none; transition: border 0.2s;
+    }
+    .input-group input:focus, .input-group select:focus { border-color: #03a9f4; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 12px 20px; border: none; border-radius: 24px;
+      font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary { background: #03a9f4; color: #fff; }
+    .btn-primary:hover { background: #0288d1; }
+    .btn-outline { background: transparent; border: 1px solid #03a9f4; color: #03a9f4; }
+    .btn-danger { background: #f44336; color: #fff; }
+    .btn-danger:hover { background: #d32f2f; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    .fab {
+      position: fixed; bottom: 80px; right: 16px;
+      background: #03a9f4; color: #fff; border: none;
+      border-radius: 28px; padding: 14px 20px;
+      font-size: 14px; font-weight: 500;
+      display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 4px 12px rgba(3,169,244,0.4);
+      cursor: pointer; z-index: 50;
+    }
+    .fab:hover { background: #0288d1; }
+
+    .list-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; background: #fff; margin: 4px 16px;
+      border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .list-item .avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 16px;
+    }
+    .list-item .content { flex: 1; }
+    .list-item .content .title { font-size: 14px; font-weight: 500; }
+    .list-item .content .subtitle { font-size: 12px; color: #666; margin-top: 2px; }
+    .list-item .trailing { font-size: 14px; font-weight: 700; }
+    .delete-btn {
+      background: none; border: none; cursor: pointer; color: #f44336;
+      padding: 8px; border-radius: 50%;
+    }
+    .delete-btn:hover { background: #ffebee; }
+
+    .counter { display: flex; align-items: center; gap: 12px; }
+    .counter button {
+      width: 36px; height: 36px; border-radius: 50%; border: 1px solid #ddd;
+      background: #fff; cursor: pointer; font-size: 20px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .counter span { font-size: 18px; font-weight: 700; min-width: 30px; text-align: center; }
+
+    .result-card {
+      background: #e1f5fe; border-radius: 12px; padding: 20px; margin: 16px;
+      text-align: center;
+    }
+    .result-amount { font-size: 26px; font-weight: 700; color: #1565c0; margin: 8px 0 16px; }
+    .qr-img { width: 220px; height: 220px; border-radius: 8px; margin: 0 auto; display: block; }
+    .copy-btns { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+
+    .fund-summary {
+      background: #e1f5fe; border-radius: 12px; padding: 16px; margin: 16px; text-align: center;
+    }
+    .fund-balance { font-size: 28px; font-weight: 700; margin: 4px 0 12px; }
+    .fund-stats { display: flex; justify-content: space-evenly; }
+    .fund-stat { text-align: center; }
+    .fund-stat .label { font-size: 12px; color: #666; }
+    .fund-stat .value { font-weight: 700; margin-top: 2px; }
+
+    .progress-section { padding: 16px; }
+    .progress-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+    .progress-bar { height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: #03a9f4; border-radius: 4px; transition: width 0.3s; }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); display: none; align-items: center;
+      justify-content: center; z-index: 200; padding: 16px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: #fff; border-radius: 16px; padding: 24px;
+      width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal h3 { margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+    .segmented { display: flex; border: 1px solid #03a9f4; border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+    .segmented button {
+      flex: 1; padding: 10px; border: none; background: #fff;
+      cursor: pointer; font-size: 13px; transition: all 0.2s;
+    }
+    .segmented button.active { background: #03a9f4; color: #fff; }
+
+    .status-select {
+      padding: 4px 8px; border-radius: 12px; border: 1px solid #ddd;
+      font-size: 12px; cursor: pointer; outline: none;
+    }
+
+    .loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .spinner {
+      width: 40px; height: 40px; border: 4px solid #e0e0e0;
+      border-top-color: #03a9f4; border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .overdue { color: #f44336 !important; font-weight: 700 !important; }
+    .line-through { text-decoration: line-through; color: #999; }
+    .empty-state { padding: 32px; text-align: center; color: #999; font-size: 14px; }
+
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: #333; color: #fff; padding: 12px 24px; border-radius: 8px;
+      font-size: 14px; z-index: 300; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div class="loading" id="loadingScreen">
+  <div class="spinner"></div>
+</div>
+
+<div class="screen" id="screen-split">
+  <div class="app-bar">Chia Tiền Nhóm Học Tập 💸</div>
+  <div style="flex:1; overflow-y:auto; padding-bottom: 16px;">
+    <div class="card">
+      <div class="card-title">1. Thông tin khoản chi</div>
+      <div class="input-group">
+        <label>Nội dung (Ví dụ: Tiền in tài liệu, Tiền trà sữa)</label>
+        <input type="text" id="splitNote" placeholder="Nội dung chi tiêu">
+      </div>
+      <div class="input-group">
+        <label>Tổng số tiền (VNĐ)</label>
+        <input type="number" id="splitAmount" placeholder="0">
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">2. Số thành viên chia</div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Số người:</span>
+        <div class="counter">
+          <button onclick="changeMemberCount(-1)">−</button>
+          <span id="memberCount">3</span>
+          <button onclick="changeMemberCount(1)">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">3. Thông tin nhận tiền</div>
+      <div class="input-group">
+        <label>Ngân hàng</label>
+        <select id="splitBank">
+          <option value="MBBank">MB Bank</option>
+          <option value="Vietcombank">Vietcombank</option>
+          <option value="Techcombank">Techcombank</option>
+          <option value="BIDV">BIDV</option>
+          <option value="VietinBank">VietinBank</option>
+          <option value="ACB">ACB</option>
+          <option value="TPBank">TPBank</option>
+          <option value="VPBank">VPBank</option>
+          <option value="Sacombank">Sacombank</option>
+          <option value="Agribank">Agribank</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Số tài khoản nhận tiền</label>
+        <input type="text" id="splitBankAccount" value="0123456789">
+      </div>
+    </div>
+    <div style="padding: 0 16px;">
+      <button class="btn btn-primary btn-full" onclick="calculateSplit()">
+        <span class="material-icons" style="font-size:18px;">qr_code_2</span>
+        Tính tiền & Tạo mã QR
+      </button>
+    </div>
+    <div id="splitResult" style="display:none;"></div>
+  </div>
+</div>
+
+<div class="screen" id="screen-fund">
+  <div class="app-bar">Quỹ Nhóm 💰</div>
+  <div style="flex:1; overflow-y:auto;">
+    <div class="fund-summary" id="fundSummary"></div>
+    <div id="fundList"></div>
+  </div>
+  <button class="fab" onclick="openModal('fundModal')">
+    <span class="material-icons">add</span> Thêm giao dịch
+  </button>
+</div>
+
+<div class="screen" id="screen-task">
+  <div class="app-bar">Công Việc & Bài Tập 📚</div>
+  <div style="flex:1; overflow-y:auto;">
+    <div class="progress-section" id="taskProgress"></div>
+    <div id="taskList"></div>
+  </div>
+  <button class="fab" onclick="openModal('taskModal')">
+    <span class="material-icons">add_task</span> Giao việc
+  </button>
+</div>
+
+<div class="screen" id="screen-member">
+  <div class="app-bar">Thành Viên Nhóm 👥</div>
+  <div style="flex:1; overflow-y:auto;">
+    <div id="memberList"></div>
+  </div>
+  <button class="fab" onclick="openModal('memberModal')">
+    <span class="material-icons">person_add</span> Thêm thành viên
+  </button>
+</div>
+
+<nav class="bottom-nav">
+  <a class="nav-item active" onclick="switchScreen(0)" id="nav-0">
+    <span class="material-icons">qr_code</span>Chia tiền
+  </a>
+  <a class="nav-item" onclick="switchScreen(1)" id="nav-1">
+    <span class="material-icons">account_balance_wallet</span>Quỹ nhóm
+  </a>
+  <a class="nav-item" onclick="switchScreen(2)" id="nav-2">
+    <span class="material-icons">task_alt</span>Công việc
+  </a>
+  <a class="nav-item" onclick="switchScreen(3)" id="nav-3">
+    <span class="material-icons">group</span>Thành viên
+  </a>
+</nav>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="fundModal">
+  <div class="modal">
+    <h3>Thêm giao dịch quỹ</h3>
+    <div class="segmented">
+      <button class="active" id="fundTypeThu" onclick="setFundType('thu')">Thu (nộp quỹ)</button>
+      <button id="fundTypeChi" onclick="setFundType('chi')">Chi tiêu</button>
+    </div>
+    <div class="input-group">
+      <label>Số tiền (VNĐ)</label>
+      <input type="number" id="fundAmount" placeholder="0">
+    </div>
+    <div class="input-group">
+      <label>Ghi chú</label>
+      <input type="text" id="fundNote" placeholder="Ghi chú">
+    </div>
+    <div class="input-group">
+      <label>Thành viên</label>
+      <select id="fundMember"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('fundModal')">Hủy</button>
+      <button class="btn btn-primary" onclick="addTransaction()">Thêm</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="taskModal">
+  <div class="modal">
+    <h3>Thêm công việc / bài tập</h3>
+    <div class="input-group">
+      <label>Tên công việc / bài tập</label>
+      <input type="text" id="taskTitle" placeholder="Nhập tên công việc">
+    </div>
+    <div class="input-group">
+      <label>Giao cho</label>
+      <select id="taskAssignee"></select>
+    </div>
+    <div class="input-group">
+      <label>Hạn chót</label>
+      <input type="date" id="taskDeadline">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('taskModal')">Hủy</button>
+      <button class="btn btn-primary" onclick="addTask()">Thêm</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="memberModal">
+  <div class="modal">
+    <h3>Thêm thành viên</h3>
+    <div class="input-group">
+      <label>Tên thành viên</label>
+      <input type="text" id="memberName" placeholder="Nhập tên">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('memberModal')">Hủy</button>
+      <button class="btn btn-primary" onclick="addMember()">Thêm</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle">Xác nhận</h3>
+    <p id="confirmText" style="font-size:14px; color:#666; margin-bottom:12px;"></p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('confirmModal')">Hủy</button>
+      <button class="btn btn-danger" id="confirmBtn">Xoá</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// URL API Google Apps Script của bạn đã được tích hợp
+const API_URL = 'https://script.google.com/macros/s/AKfycbzRsZWncGdF724ON8ltRxRAFb8PdrPgO2sFg5U29iiit1FWSb2vDdjCN6uCni4RFmPkww/exec';
+
+let members = [];
+let transactions = [];
+let tasks = [];
+let splitMemberCount = 3;
+let fundType = 'thu';
+
+async function init() {
+  try {
+    const res = await fetch(API_URL + '?action=getAll');
+    const data = await res.json();
+    members = (data.members || []).map(m => ({ id: String(m.id), name: String(m.name) }));
+    transactions = (data.transactions || []).map(t => ({
+      id: String(t.id),
+      type: String(t.type),
+      amount: Number(t.amount) || 0,
+      note: String(t.note || ''),
+      date: String(t.date || ''),
+      memberId: String(t.memberId || ''),
+    }));
+    tasks = (data.tasks || []).map(t => ({
+      id: String(t.id),
+      title: String(t.title),
+      assigneeId: String(t.assigneeId || ''),
+      deadline: String(t.deadline || ''),
+      status: String(t.status || 'todo'),
+    }));
+  } catch (e) {
+    showToast('Không thể kết nối đến máy chủ!');
+    console.error('Load error:', e);
+  }
+  document.getElementById('loadingScreen').style.display = 'none';
+  switchScreen(0);
+}
+
+function switchScreen(index) {
+  const screens = ['screen-split', 'screen-fund', 'screen-task', 'screen-member'];
+  screens.forEach((s, i) => {
+    document.getElementById(s).classList.toggle('active', i === index);
+    document.getElementById('nav-' + i).classList.toggle('active', i === index);
+  });
+  if (index === 1) renderFund();
+  if (index === 2) renderTasks();
+  if (index === 3) renderMembers();
+}
+
+function newId() { return Date.now().toString() + Math.random().toString(36).slice(2, 6); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+  if (id === 'fundModal' || id === 'taskModal') populateMemberSelects();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function populateMemberSelects() {
+  if (members.length === 0) {
+    const emptyOpt = '<option value="">(Chưa có thành viên nào)</option>';
+    document.getElementById('fundMember').innerHTML = emptyOpt;
+    document.getElementById('taskAssignee').innerHTML = emptyOpt;
+    return;
+  }
+  const opts = members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+  document.getElementById('fundMember').innerHTML = opts;
+  document.getElementById('taskAssignee').innerHTML = opts;
+}
+
+function getMemberName(id) {
+  if (!id) return 'Không xác định';
+  const m = members.find(m => m.id === id);
+  return m ? m.name : 'Không xác định';
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return '';
+  return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+}
+
+async function apiCall(data) {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (e) {
+    console.error('API Error:', e);
+  }
+}
+
+// === TAB 1: CHIA TIỀN ===
+function changeMemberCount(delta) {
+  splitMemberCount = Math.max(1, splitMemberCount + delta);
+  document.getElementById('memberCount').textContent = splitMemberCount;
+}
+
+function calculateSplit() {
+  const amount = parseFloat(document.getElementById('splitAmount').value) || 0;
+  const note = document.getElementById('splitNote').value.trim() || 'Chia tien nhom';
+  const bank = document.getElementById('splitBank').value;
+  const bankNo = document.getElementById('splitBankAccount').value.trim();
+
+  if (amount <= 0) { showToast('Vui lòng nhập số tiền hợp lệ'); return; }
+  if (!bankNo) { showToast('Vui lòng nhập số tài khoản'); return; }
+
+  const perPerson = Math.round(amount / splitMemberCount);
+  const memo = encodeURIComponent(note);
+  const qrUrl = `https://img.vietqr.io/image/${bank}-${bankNo}-compact.png?amount=${perPerson}&addInfo=${memo}`;
+
+  const resDiv = document.getElementById('splitResult');
+  resDiv.style.display = 'block';
+  resDiv.innerHTML = `
+    <div class="result-card">
+      <div style="color:#666;">Mỗi người cần chuyển</div>
+      <div class="result-amount">${perPerson.toLocaleString('vi-VN')} đ</div>
+      <img src="${qrUrl}" class="qr-img" alt="QR Code">
+      <div class="copy-btns">
+        <button class="btn btn-outline" onclick="copyText('${bankNo}','số tài khoản')">
+          <span class="material-icons" style="font-size:16px;">content_copy</span> STK
+        </button>
+        <button class="btn btn-outline" onclick="copyText('${perPerson}','số tiền')">
+          <span class="material-icons" style="font-size:16px;">content_copy</span> Số tiền
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function copyText(text, label) {
+  navigator.clipboard.writeText(text);
+  showToast('Đã sao chép ' + label);
+}
+
+// === TAB 2: QUỸ NHÓM ===
+function setFundType(type) {
+  fundType = type;
+  document.getElementById('fundTypeThu').classList.toggle('active', type === 'thu');
+  document.getElementById('fundTypeChi').classList.toggle('active', type === 'chi');
+}
+
+function renderFund() {
+  const totalThu = transactions.filter(t => t.type === 'thu').reduce((s, t) => s + t.amount, 0);
+  const totalChi = transactions.filter(t => t.type === 'chi').reduce((s, t) => s + t.amount, 0);
+  const balance = totalThu - totalChi;
+
+  document.getElementById('fundSummary').innerHTML = `
+    <div style="font-size:14px;">Số dư quỹ hiện tại</div>
+    <div class="fund-balance" style="color:${balance >= 0 ? '#2e7d32' : '#f44336'}">${balance.toLocaleString('vi-VN')} đ</div>
+    <div class="fund-stats">
+      <div class="fund-stat"><div class="label">Tổng thu</div><div class="value" style="color:#2e7d32">${totalThu.toLocaleString('vi-VN')} đ</div></div>
+      <div class="fund-stat"><div class="label">Tổng chi</div><div class="value" style="color:#f44336">${totalChi.toLocaleString('vi-VN')} đ</div></div>
+    </div>
+  `;
+
+  const sorted = [...transactions].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  if (sorted.length === 0) {
+    document.getElementById('fundList').innerHTML = '<div class="empty-state">Chưa có giao dịch nào</div>';
+    return;
+  }
+  document.getElementById('fundList').innerHTML = sorted.map(t => {
+    const isThu = t.type === 'thu';
+    return `
+      <div class="list-item">
+        <div class="avatar" style="background:${isThu ? '#e8f5e9' : '#ffebee'}; color:${isThu ? '#2e7d32' : '#c62828'}">
+          <span class="material-icons">${isThu ? 'add' : 'remove'}</span>
+        </div>
+        <div class="content">
+          <div class="title">${t.note || (isThu ? 'Nộp quỹ' : 'Chi tiêu')}</div>
+          <div class="subtitle">${getMemberName(t.memberId)} • ${formatDate(t.date)}</div>
+        </div>
+        <div class="trailing" style="color:${isThu ? '#2e7d32' : '#c62828'}">${isThu ? '+' : '-'}${t.amount.toLocaleString('vi-VN')} đ</div>
+        <button class="delete-btn" onclick="removeTransaction('${t.id}')"><span class="material-icons">delete</span></button>
+      </div>
+    `;
+  }).join('');
+}
+
+async function addTransaction() {
+  const amount = parseFloat(document.getElementById('fundAmount').value) || 0;
+  if (amount <= 0) { showToast('Vui lòng nhập số tiền hợp lệ'); return; }
+
+  const t = {
+    id: newId(),
+    type: fundType,
+    amount: amount,
+    note: document.getElementById('fundNote').value.trim(),
+    date: new Date().toISOString(),
+    memberId: document.getElementById('fundMember').value,
+  };
+  transactions.push(t);
+  closeModal('fundModal');
+  renderFund();
+
+  document.getElementById('fundAmount').value = '';
+  document.getElementById('fundNote').value = '';
+
+  await apiCall({ action: 'addTransaction', ...t });
+  showToast('Đã thêm giao dịch');
+}
+
+async function removeTransaction(id) {
+  transactions = transactions.filter(t => t.id !== id);
+  renderFund();
+  await apiCall({ action: 'removeTransaction', id });
+  showToast('Đã xoá giao dịch');
+}
+
+// === TAB 3: CÔNG VIỆC ===
+function renderTasks() {
+  const doneCount = tasks.filter(t => t.status === 'done').length;
+  const progress = tasks.length === 0 ? 0 : Math.round((doneCount / tasks.length) * 100);
+
+  document.getElementById('taskProgress').innerHTML = `
+    <div class="progress-header">
+      <span>Tiến độ: ${doneCount}/${tasks.length} hoàn thành</span>
+      <span>${progress}%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+  `;
+
+  const sorted = [...tasks].sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
+  if (sorted.length === 0) {
+    document.getElementById('taskList').innerHTML = '<div class="empty-state">Chưa có công việc nào</div>';
+    return;
+  }
+
+  document.getElementById('taskList').innerHTML = sorted.map(t => {
+    const isOverdue = t.deadline && t.status !== 'done' && new Date(t.deadline) < new Date();
+    const titleClass = t.status === 'done' ? 'line-through' : '';
+    const subtitleClass = isOverdue ? 'overdue' : '';
+
+    return `
+      <div class="list-item">
+        <div style="width:12px;height:12px;border-radius:50%;background:${t.status === 'todo' ? '#9e9e9e' : t.status === 'doing' ? '#ff9800' : '#4caf50'}"></div>
+        <div class="content">
+          <div class="title ${titleClass}">${t.title}</div>
+          <div class="subtitle ${subtitleClass}">${getMemberName(t.assigneeId)}${t.deadline ? ' • Hạn: ' + formatDate(t.deadline) : ''}${isOverdue ? ' • Quá hạn!' : ''}</div>
+        </div>
+        <select class="status-select" onchange="updateTaskStatus('${t.id}', this.value)">
+          <option value="todo" ${t.status === 'todo' ? 'selected' : ''}>Chưa làm</option>
+          <option value="doing" ${t.status === 'doing' ? 'selected' : ''}>Đang làm</option>
+          <option value="done" ${t.status === 'done' ? 'selected' : ''}>Hoàn thành</option>
+        </select>
+        <button class="delete-btn" onclick="removeTask('${t.id}')"><span class="material-icons">delete</span></button>
+      </div>
+    `;
+  }).join('');
+}
+
+async function addTask() {
+  const title = document.getElementById('taskTitle').value.trim();
+  if (!title) { showToast('Vui lòng nhập tên công việc'); return; }
+
+  const t = {
+    id: newId(),
+    title: title,
+    assigneeId: document.getElementById('taskAssignee').value,
+    deadline: document.getElementById('taskDeadline').value,
+    status: 'todo',
+  };
+  tasks.push(t);
+  closeModal('taskModal');
+  renderTasks();
+
+  document.getElementById('taskTitle').value = '';
+  document.getElementById('taskDeadline').value = '';
+
+  await apiCall({ action: 'addTask', ...t });
+  showToast('Đã thêm công việc');
+}
+
+async function updateTaskStatus(id, status) {
+  const task = tasks.find(t => t.id === id);
+  if (task) task.status = status;
+  renderTasks();
+  await apiCall({ action: 'updateTaskStatus', id, status });
+}
+
+async function removeTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  renderTasks();
+  await apiCall({ action: 'removeTask', id });
+  showToast('Đã xoá công việc');
+}
+
+// === TAB 4: THÀNH VIÊN ===
+function renderMembers() {
+  if (members.length === 0) {
+    document.getElementById('memberList').innerHTML = '<div class="empty-state">Chưa có thành viên nào</div>';
+    return;
+  }
+  document.getElementById('memberList').innerHTML = members.map(m => `
+    <div class="list-item">
+      <div class="avatar" style="background:#e3f2fd; color:#1565c0;">${m.name ? m.name[0].toUpperCase() : '?'}</div>
+      <div class="content"><div class="title">${m.name}</div></div>
+      <button class="delete-btn" onclick="confirmRemoveMember('${m.id}','${m.name}')"><span class="material-icons">delete_outline</span></button>
+    </div>
+  `).join('');
+}
+
+async function addMember() {
+  const name = document.getElementById('memberName').value.trim();
+  if (!name) { showToast('Vui lòng nhập tên'); return; }
+
+  const m = { id: newId(), name: name };
+  members.push(m);
+  closeModal('memberModal');
+  renderMembers();
+  document.getElementById('memberName').value = '';
+
+  await apiCall({ action: 'addMember', ...m });
+  showToast('Đã thêm thành viên');
+}
+
+function confirmRemoveMember(id, name) {
+  document.getElementById('confirmTitle').textContent = 'Xoá thành viên?';
+  document.getElementById('confirmText').textContent = `Bạn có chắc muốn xoá "${name}"? Các giao dịch/công việc cũ vẫn giữ nguyên ID nhưng tên hiển thị sẽ về "Không xác định".`;
+  document.getElementById('confirmBtn').onclick = () => removeMember(id);
+  openModal('confirmModal');
+}
+
+async function removeMember(id) {
+  members = members.filter(m => m.id !== id);
+  closeModal('confirmModal');
+  renderMembers();
+  await apiCall({ action: 'removeMember', id });
+  showToast('Đã xoá thành viên');
+}
+
+init();
+</script>
+</body>
+</html>
