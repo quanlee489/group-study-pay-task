@@ -200,6 +200,91 @@
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbzRsZWncGdF724ON8ltRxRAFb8PdrPgO2sFg5U29iiit1FWSb2vDdjCN6uCni4RFmPkww/exec';
 
+    // --------------------------------------------------------
+    // // LocalStorage để lưu phiên làm việc cá nhân
+let currentUser = JSON.parse(localStorage.getItem('gs_user')) || null;
+let currentGroup = JSON.parse(localStorage.getItem('gs_group')) || null;
+
+function switchGroupTab(type) {
+  document.getElementById('tabJoinBtn').classList.toggle('active', type === 'join');
+  document.getElementById('tabCreateBtn').classList.toggle('active', type === 'create');
+  document.getElementById('formJoinGroup').style.display = type === 'join' ? 'block' : 'none';
+  document.getElementById('formCreateGroup').style.display = type === 'create' ? 'block' : 'none';
+}
+
+// Kiếm tra nếu đã đăng nhập nhóm trước đó thì ẩn Modal
+function checkAuthSession() {
+  if (currentUser && currentGroup) {
+    document.getElementById('authGroupModal').classList.remove('active');
+    loadGroupData(currentGroup.id);
+  } else {
+    document.getElementById('authGroupModal').classList.add('active');
+  }
+}
+
+async function handleCreateGroup() {
+  const groupName = document.getElementById('createGroupNameInput').value.trim();
+  const userName = document.getElementById('adminNameInput').value.trim();
+  
+  if (!groupName || !userName) {
+    showToast('Vui lòng nhập đầy đủ thông tin!', true);
+    return;
+  }
+  
+  const userId = 'usr_' + Date.now();
+  currentUser = { id: userId, name: userName };
+  
+  showToast('Đang khởi tạo nhóm...');
+  const res = await apiCall({ action: 'createGroup', groupName, userId });
+  
+  if (res && res.status === 'success') {
+    currentGroup = res.group;
+    
+    // Lưu session vào máy người dùng
+    localStorage.setItem('gs_user', JSON.stringify(currentUser));
+    localStorage.setItem('gs_group', JSON.stringify(currentGroup));
+    
+    // Tự động thêm Admin làm thành viên đầu tiên
+    await apiCall({ action: 'addMember', id: userId, name: userName, groupId: currentGroup.id });
+    
+    alert(`Tạo nhóm thành công!\nMã chia sẻ của nhóm bạn là: ${currentGroup.code}`);
+    document.getElementById('authGroupModal').classList.remove('active');
+    init(); // Tải lại toàn bộ ứng dụng
+  }
+}
+
+async function handleJoinGroup() {
+  const userName = document.getElementById('userNameInput').value.trim();
+  const groupCode = document.getElementById('groupCodeInput').value.trim().toUpperCase();
+  
+  if (!userName || !groupCode) {
+    showToast('Vui lòng nhập Tên và Mã nhóm!', true);
+    return;
+  }
+  
+  const userId = 'usr_' + Date.now();
+  currentUser = { id: userId, name: userName };
+  
+  showToast('Đang kiểm tra mã nhóm...');
+  const res = await apiCall({ action: 'joinGroup', groupCode, userId });
+  
+  if (res && res.status === 'success') {
+    currentGroup = res.group;
+    
+    localStorage.setItem('gs_user', JSON.stringify(currentUser));
+    localStorage.setItem('gs_group', JSON.stringify(currentGroup));
+    
+    // Thêm người dùng mới vào danh sách thành viên của nhóm
+    await apiCall({ action: 'addMember', id: userId, name: userName, groupId: currentGroup.id });
+    
+    showToast('Tham gia nhóm thành công!');
+    document.getElementById('authGroupModal').classList.remove('active');
+    init();
+  } else {
+    showToast(res ? res.message : 'Lỗi tham gia nhóm', true);
+  }
+}
+    // --------------------------------------------------
     let groupId = localStorage.getItem('groupId') || '';
     let groupCode = localStorage.getItem('groupCode') || '';
     let members = [], transactions = [], tasks = [];
