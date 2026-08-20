@@ -3,298 +3,202 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GroupStudy Pay - Quản Lý Nhóm Học Tập</title>
+  <title>GroupStudy - Quản Lý Nhóm & Công Nợ</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Roboto', sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 100; }
-    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 0; cursor: pointer; color: #666; text-decoration: none; font-size: 12px; }
-    .nav-item.active { color: #03a9f4; }
-    .nav-item .material-icons { font-size: 24px; margin-bottom: 2px; }
-    .screen { display: none; flex: 1; padding-bottom: 70px; }
+    body { font-family: 'Roboto', sans-serif; background: #f4f6f9; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    /* Bottom Navigation Bar */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.08); z-index: 100; }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 0; cursor: pointer; color: #757575; text-decoration: none; font-size: 11px; }
+    .nav-item.active { color: #0288d1; font-weight: 500; }
+    .nav-item .material-icons { font-size: 22px; margin-bottom: 2px; }
+    
+    /* Screen Management */
+    .screen { display: none; flex: 1; padding-bottom: 75px; }
     .screen.active { display: flex; flex-direction: column; }
-    .app-bar { background: #b3e5fc; padding: 16px; text-align: center; font-size: 18px; font-weight: 700; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
-    .group-tag { font-size: 12px; background: #0288d1; color: #fff; padding: 4px 8px; border-radius: 12px; cursor: pointer; }
-    .card { background: #fff; border-radius: 12px; padding: 16px; margin: 8px 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
-    .input-group { margin-bottom: 12px; position: relative; text-align: left; }
+    
+    /* App Bar / Header */
+    .app-bar { background: #0288d1; color: #fff; padding: 16px; text-align: center; font-size: 18px; font-weight: 700; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .group-tag { font-size: 12px; background: rgba(255,255,255,0.2); color: #fff; padding: 4px 10px; border-radius: 12px; cursor: pointer; }
+    
+    /* Cards & Layout */
+    .card { background: #fff; border-radius: 12px; padding: 16px; margin: 8px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .card-title { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    
+    /* Quick Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 8px 16px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; }
+    .stat-card .val { font-size: 18px; font-weight: 700; margin-top: 4px; }
+    .stat-card .lbl { font-size: 11px; color: #757575; }
+    
+    /* Form Inputs & Buttons */
+    .input-group { margin-bottom: 12px; text-align: left; }
     .input-group label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
-    .input-group input, .input-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
-    .input-group input:focus, .input-group select:focus { border-color: #03a9f4; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 20px; border: none; border-radius: 24px; font-size: 14px; font-weight: 500; cursor: pointer; }
-    .btn-primary { background: #03a9f4; color: #fff; }
-    .btn-outline { background: transparent; border: 1px solid #03a9f4; color: #03a9f4; }
+    .input-group input, .input-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; border: none; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; }
+    .btn-primary { background: #0288d1; color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid #0288d1; color: #0288d1; }
     .btn-full { width: 100%; }
-    .fab { position: fixed; bottom: 80px; right: 16px; background: #03a9f4; color: #fff; border: none; border-radius: 28px; padding: 14px 20px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(3,169,244,0.4); cursor: pointer; z-index: 50; }
-    .list-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #fff; margin: 4px 16px; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-    .list-item .content { flex: 1; }
-    .list-item .content .title { font-size: 14px; font-weight: 500; }
-    .list-item .content .subtitle { font-size: 12px; color: #666; margin-top: 2px; }
-    .list-item .trailing { font-size: 14px; font-weight: 700; }
-    .counter { display: flex; align-items: center; gap: 12px; }
-    .counter button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #ddd; background: #fff; cursor: pointer; font-size: 20px; }
-    .counter span { font-size: 18px; font-weight: 700; min-width: 30px; text-align: center; }
-    .result-card { background: #e1f5fe; border-radius: 12px; padding: 20px; margin: 16px; text-align: center; }
-    .result-amount { font-size: 26px; font-weight: 700; color: #1565c0; margin: 8px 0 16px; }
-    .qr-img { width: 220px; height: 220px; border-radius: 8px; margin: 0 auto; display: block; }
-    .fund-summary { background: #e1f5fe; border-radius: 12px; padding: 16px; margin: 16px; text-align: center; }
-    .fund-balance { font-size: 28px; font-weight: 700; margin: 4px 0 12px; }
+    
+    /* Lists & Items */
+    .fab { position: fixed; bottom: 75px; right: 16px; background: #0288d1; color: #fff; border: none; border-radius: 28px; padding: 12px 18px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(2,136,209,0.4); cursor: pointer; z-index: 50; }
+    .list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; margin: 4px 16px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .list-item .title { font-size: 14px; font-weight: 500; color: #333; }
+    .list-item .subtitle { font-size: 12px; color: #757575; margin-top: 2px; }
+    
+    /* Color Badges for Debt & Task Status */
+    .debt-receive { color: #2e7d32; font-weight: 700; }
+    .debt-pay { color: #d32f2f; font-weight: 700; }
+    .debt-equal { color: #757575; font-weight: 500; }
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; color: #fff; }
+    .badge-ontime { background: #4caf50; }
+    .badge-late { background: #f44336; }
+    .badge-pending { background: #ff9800; }
+    
+    /* Modals */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
     .modal-overlay.active { display: flex; }
-    .modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
-    .modal h3 { margin-bottom: 16px; }
-    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
-    .segmented { display: flex; border: 1px solid #03a9f4; border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
-    .segmented button { flex: 1; padding: 10px; border: none; background: #fff; cursor: pointer; font-size: 13px; }
-    .segmented button.active { background: #03a9f4; color: #fff; }
-    .empty-state { padding: 32px; text-align: center; color: #999; font-size: 14px; }
-    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 300; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-    .toast.show { opacity: 1; }
+    .modal { background: #fff; border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
+    .segmented { display: flex; border: 1px solid #0288d1; border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+    .segmented button { flex: 1; padding: 8px; border: none; background: #fff; cursor: pointer; font-size: 13px; color: #0288d1; }
+    .segmented button.active { background: #0288d1; color: #fff; }
   </style>
 </head>
 <body>
 
-  <!-- MODAL: TẠO HOẶC THAM GIA NHÓM -->
+  <!-- MODAL ĐĂNG NHẬP / TẠO NHÓM -->
   <div class="modal-overlay active" id="authGroupModal">
     <div class="modal">
-      <h3>Quản Lý Nhóm Học Tập 🔐</h3>
+      <h3 style="margin-bottom:12px; text-align:center;">Quản Lý Nhóm Học Tập 🔐</h3>
       <div class="segmented">
         <button class="active" id="tabJoinBtn" onclick="switchGroupTab('join')">Tham gia nhóm</button>
         <button id="tabCreateBtn" onclick="switchGroupTab('create')">Tạo nhóm mới</button>
       </div>
-
       <div id="formJoinGroup">
-        <div class="input-group">
-          <label>Tên của bạn</label>
-          <input type="text" id="userNameInput" placeholder="Ví dụ: Nguyễn Văn A">
-        </div>
-        <div class="input-group">
-          <label>Mã nhóm (6 ký tự)</label>
-          <input type="text" id="groupCodeInput" placeholder="Ví dụ: 8X92K1" style="text-transform: uppercase;">
-        </div>
+        <div class="input-group"><label>Tên của bạn</label><input type="text" id="userNameInput" placeholder="Ví dụ: Nguyễn Văn A"></div>
+        <div class="input-group"><label>Mã nhóm (6 ký tự)</label><input type="text" id="groupCodeInput" placeholder="Ví dụ: 8X92K1" style="text-transform: uppercase;"></div>
         <button class="btn btn-primary btn-full" onclick="handleJoinGroup()">Tham Gia Nhóm</button>
       </div>
-
       <div id="formCreateGroup" style="display:none;">
-        <div class="input-group">
-          <label>Tên nhóm học tập</label>
-          <input type="text" id="createGroupNameInput" placeholder="Ví dụ: Nhóm Ôn Thi HSG Tin">
-        </div>
-        <div class="input-group">
-          <label>Tên Trưởng nhóm (Bạn)</label>
-          <input type="text" id="adminNameInput" placeholder="Ví dụ: Trần Thị B">
-        </div>
+        <div class="input-group"><label>Tên nhóm học tập</label><input type="text" id="createGroupNameInput" placeholder="Ví dụ: Nhóm Ôn Thi Tin"></div>
+        <div class="input-group"><label>Tên Trưởng nhóm</label><input type="text" id="adminNameInput" placeholder="Ví dụ: Trần Thị B"></div>
         <button class="btn btn-primary btn-full" onclick="handleCreateGroup()">Tạo Nhóm & Lấy Mã</button>
       </div>
     </div>
   </div>
 
-  <!-- MÀN HÌNH CHÍNH ỨNG DỤNG -->
+  <!-- BỐ CỤC CHÍNH CỦA ỨNG DỤNG -->
   <div id="mainApp" style="display:none; flex-direction:column; min-height:100vh;">
 
-    <!-- TAB 1: CHIA TIỀN -->
-    <div class="screen" id="screen-split">
-      <div class="app-bar">
-        <span>Chia Tiền Nhóm 💸</span>
-        <span class="group-tag" onclick="leaveGroup()" id="displayGroupCode"></span>
-      </div>
-      <div style="flex:1; overflow-y:auto; padding-bottom: 16px;">
-        <div class="card">
-          <div class="card-title">1. Thông tin khoản chi</div>
-          <div class="input-group"><label>Nội dung chi tiêu</label><input type="text" id="splitNote" placeholder="Ví dụ: Tiền in tài liệu"></div>
-          <div class="input-group"><label>Tổng số tiền (VNĐ)</label><input type="number" id="splitAmount" placeholder="0"></div>
-        </div>
-        <div class="card">
-          <div class="card-title">2. Số thành viên chia</div>
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span>Số người:</span>
-            <div class="counter">
-              <button onclick="changeMemberCount(-1)">−</button>
-              <span id="memberCount">3</span>
-              <button onclick="changeMemberCount(1)">+</button>
-            </div>
+    <!-- TAB 0: DASHBOARD & CÔNG NỢ -->
+    <div class="screen" id="screen-dashboard">
+      <div class="app-bar"><span>Dashboard & Công Nợ 📌</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode0"></span></div>
+      <div style="flex:1; overflow-y:auto; padding-top: 8px;">
+        
+        <!-- THỐNG KÊ CHI TIÊU NHANH -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="lbl">Tổng chi tiêu nhóm</span>
+            <div class="val" style="color:#d32f2f;" id="dashTotalSpend">0 đ</div>
+          </div>
+          <div class="stat-card">
+            <span class="lbl">Trung bình / Người</span>
+            <div class="val" style="color:#0288d1;" id="dashAvgSpend">0 đ</div>
           </div>
         </div>
+
+        <!-- KHU VỰC CÔNG NỢ (AI NỢ AI BAO NHIÊU) -->
         <div class="card">
-          <div class="card-title">3. Thông tin nhận tiền</div>
-          <div class="input-group">
-            <label>Ngân hàng</label>
-            <select id="splitBank">
-              <option value="MBBank">MB Bank</option>
-              <option value="Vietcombank">Vietcombank</option>
-              <option value="Techcombank">Techcombank</option>
-              <option value="BIDV">BIDV</option>
-            </select>
-          </div>
-          <div class="input-group"><label>Số tài khoản</label><input type="text" id="splitBankAccount" value="0123456789"></div>
+          <div class="card-title"><span class="material-icons" style="color:#0288d1;">account_balance</span> Bảng Tính Công Nợ Chi Tiết</div>
+          <div id="debtCalculationList" style="font-size:13px;">Chưa có dữ liệu giao dịch</div>
         </div>
-        <div style="padding: 0 16px;">
-          <button class="btn btn-primary btn-full" onclick="calculateSplit()"><span class="material-icons">qr_code_2</span> Tạo Mã QR</button>
+
+        <!-- CẢNH BÁO DEADLINE -->
+        <div class="card">
+          <div class="card-title"><span class="material-icons" style="color:#ed6c02;">warning</span> Cảnh báo công việc cần chú ý</div>
+          <div id="dashAlertList" style="font-size:13px; color:#666;">Chưa có dữ liệu</div>
         </div>
-        <div id="splitResult" style="display:none;"></div>
+
       </div>
     </div>
 
-    <!-- TAB 2: QUỸ NHÓM -->
-    <div class="screen" id="screen-fund">
-      <div class="app-bar"><span>Quỹ Nhóm 💰</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode2"></span></div>
-      <div style="flex:1; overflow-y:auto;"><div class="fund-summary" id="fundSummary"></div><div id="fundList"></div></div>
-      <button class="fab" onclick="openModal('fundModal')"><span class="material-icons">add</span> Thêm giao dịch</button>
-    </div>
-
-    <!-- TAB 3: CÔNG VIỆC -->
+    <!-- TAB 1: QUẢN LÝ CÔNG VIỆC -->
     <div class="screen" id="screen-task">
-      <div class="app-bar"><span>Công Việc 📚</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode3"></span></div>
-      <div style="flex:1; overflow-y:auto;"><div id="taskList"></div></div>
+      <div class="app-bar"><span>Công Việc & Deadline 📚</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode1"></span></div>
+      <div style="flex:1; overflow-y:auto; padding-top: 8px;" id="taskList"></div>
       <button class="fab" onclick="openModal('taskModal')"><span class="material-icons">add_task</span> Giao việc</button>
     </div>
 
-    <!-- TAB 4: THÀNH VIÊN -->
-    <div class="screen" id="screen-member">
-      <div class="app-bar"><span>Thành Viên 👥</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode4"></span></div>
-      <div style="flex:1; overflow-y:auto;"><div id="memberList"></div></div>
-      <button class="fab" onclick="openModal('memberModal')"><span class="material-icons">person_add</span> Thêm thành viên</button>
+    <!-- TAB 2: QUẢN LÝ THU CHI & QUỸ -->
+    <div class="screen" id="screen-fund">
+      <div class="app-bar"><span>Quỹ & Giao Dịch 💰</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode2"></span></div>
+      <div style="flex:1; overflow-y:auto; padding: 8px;">
+        <div class="card">
+          <div class="card-title">Số Dư Quỹ Hiện Tại</div>
+          <h2 id="fundBalance" style="color:#2e7d32; text-align:center; margin: 10px 0;">0 đ</h2>
+        </div>
+        <div id="fundList"></div>
+      </div>
+      <button class="fab" onclick="openModal('fundModal')"><span class="material-icons">add</span> Nhập giao dịch</button>
     </div>
 
+    <!-- THANH MENU ĐIỀU HƯỚNG DƯỚI -->
     <nav class="bottom-nav">
-      <a class="nav-item active" onclick="switchScreen(0)" id="nav-0"><span class="material-icons">qr_code</span>Chia tiền</a>
-      <a class="nav-item" onclick="switchScreen(1)" id="nav-1"><span class="material-icons">account_balance_wallet</span>Quỹ nhóm</a>
-      <a class="nav-item" onclick="switchScreen(2)" id="nav-2"><span class="material-icons">task_alt</span>Công việc</a>
-      <a class="nav-item" onclick="switchScreen(3)" id="nav-3"><span class="material-icons">group</span>Thành viên</a>
+      <a class="nav-item active" onclick="switchScreen(0)" id="nav-0"><span class="material-icons">dashboard</span>Tổng quan & Nợ</a>
+      <a class="nav-item" onclick="switchScreen(1)" id="nav-1"><span class="material-icons">task_alt</span>Công việc</a>
+      <a class="nav-item" onclick="switchScreen(2)" id="nav-2"><span class="material-icons">account_balance_wallet</span>Thu chi</a>
     </nav>
   </div>
 
-  <!-- MODALS -->
-  <div class="modal-overlay" id="fundModal">
-    <div class="modal">
-      <h3>Thêm giao dịch quỹ</h3>
-      <div class="segmented"><button class="active" id="fundTypeThu" onclick="setFundType('thu')">Thu</button><button id="fundTypeChi" onclick="setFundType('chi')">Chi</button></div>
-      <div class="input-group"><label>Số tiền</label><input type="number" id="fundAmount" placeholder="0"></div>
-      <div class="input-group"><label>Ghi chú</label><input type="text" id="fundNote"></div>
-      <div class="input-group"><label>Thành viên</label><select id="fundMember"></select></div>
-      <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('fundModal')">Hủy</button><button class="btn btn-primary" onclick="addTransaction()">Lưu</button></div>
-    </div>
-  </div>
-
+  <!-- MODAL GIAO VIỆC -->
   <div class="modal-overlay" id="taskModal">
     <div class="modal">
-      <h3>Giao việc</h3>
-      <div class="input-group"><label>Tên công việc</label><input type="text" id="taskTitle"></div>
-      <div class="input-group"><label>Người làm</label><select id="taskAssignee"></select></div>
-      <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('taskModal')">Hủy</button><button class="btn btn-primary" onclick="addTask()">Tạo</button></div>
+      <h3>Thêm công việc & Deadline</h3>
+      <div class="input-group"><label>Tên công việc</label><input type="text" id="taskTitle" placeholder="Ví dụ: Làm slide thuyết trình"></div>
+      <div class="input-group"><label>Người thực hiện</label><select id="taskAssignee"></select></div>
+      <div class="input-group"><label>Hạn chót (Deadline)</label><input type="datetime-local" id="taskDeadline"></div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+        <button class="btn btn-outline" onclick="closeModal('taskModal')">Hủy</button>
+        <button class="btn btn-primary" onclick="addTask()">Lưu</button>
+      </div>
     </div>
   </div>
 
-  <div class="modal-overlay" id="memberModal">
+  <!-- MODAL THU CHI -->
+  <div class="modal-overlay" id="fundModal">
     <div class="modal">
-      <h3>Thêm thành viên</h3>
-      <div class="input-group"><label>Tên thành viên</label><input type="text" id="memberName"></div>
-      <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('memberModal')">Hủy</button><button class="btn btn-primary" onclick="addMember()">Thêm</button></div>
+      <h3>Ghi Nhận Thu Chi / Đóng Quỹ</h3>
+      <div class="segmented">
+        <button class="active" id="fundTypeChi" onclick="setFundType('chi')">Thành viên Chi tiền</button>
+        <button id="fundTypeThu" onclick="setFundType('thu')">Đóng quỹ</button>
+      </div>
+      <div class="input-group"><label>Người ứng tiền / Đóng tiền</label><select id="fundPayer"></select></div>
+      <div class="input-group"><label>Số tiền (VNĐ)</label><input type="number" id="fundAmount" placeholder="0"></div>
+      <div class="input-group"><label>Nội dung chi / Thu</label><input type="text" id="fundNote" placeholder="Ví dụ: In ấn tài liệu, Mua trà sữa"></div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+        <button class="btn btn-outline" onclick="closeModal('fundModal')">Hủy</button>
+        <button class="btn btn-primary" onclick="addFund()">Lưu giao dịch</button>
+      </div>
     </div>
   </div>
-
-  <div class="toast" id="toast"></div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxDB-MkGgg2tFT9qTpx7tKRS3SA8t6Ckr0D3hVHPLmAksAjx6eo0Y9I9i2Hhq11198g/exec';
+    // URL Web App lấy từ Google Apps Script
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwvJuHWrFrzxvBc1Hs3MQkLOML9V1zX1JX2woMvrjj01CLcd6dMBFlu1lxHPKoAbw_Rkg/exec';
 
-    // --------------------------------------------------------
-    // // LocalStorage để lưu phiên làm việc cá nhân
-let currentUser = JSON.parse(localStorage.getItem('gs_user')) || null;
-let currentGroup = JSON.parse(localStorage.getItem('gs_group')) || null;
-
-function switchGroupTab(type) {
-  document.getElementById('tabJoinBtn').classList.toggle('active', type === 'join');
-  document.getElementById('tabCreateBtn').classList.toggle('active', type === 'create');
-  document.getElementById('formJoinGroup').style.display = type === 'join' ? 'block' : 'none';
-  document.getElementById('formCreateGroup').style.display = type === 'create' ? 'block' : 'none';
-}
-
-// Kiếm tra nếu đã đăng nhập nhóm trước đó thì ẩn Modal
-function checkAuthSession() {
-  if (currentUser && currentGroup) {
-    document.getElementById('authGroupModal').classList.remove('active');
-    loadGroupData(currentGroup.id);
-  } else {
-    document.getElementById('authGroupModal').classList.add('active');
-  }
-}
-
-async function handleCreateGroup() {
-  const groupName = document.getElementById('createGroupNameInput').value.trim();
-  const userName = document.getElementById('adminNameInput').value.trim();
-  
-  if (!groupName || !userName) {
-    showToast('Vui lòng nhập đầy đủ thông tin!', true);
-    return;
-  }
-  
-  const userId = 'usr_' + Date.now();
-  currentUser = { id: userId, name: userName };
-  
-  showToast('Đang khởi tạo nhóm...');
-  const res = await apiCall({ action: 'createGroup', groupName, userId });
-  
-  if (res && res.status === 'success') {
-    currentGroup = res.group;
-    
-    // Lưu session vào máy người dùng
-    localStorage.setItem('gs_user', JSON.stringify(currentUser));
-    localStorage.setItem('gs_group', JSON.stringify(currentGroup));
-    
-    // Tự động thêm Admin làm thành viên đầu tiên
-    await apiCall({ action: 'addMember', id: userId, name: userName, groupId: currentGroup.id });
-    
-    alert(`Tạo nhóm thành công!\nMã chia sẻ của nhóm bạn là: ${currentGroup.code}`);
-    document.getElementById('authGroupModal').classList.remove('active');
-    init(); // Tải lại toàn bộ ứng dụng
-  }
-}
-
-async function handleJoinGroup() {
-  const userName = document.getElementById('userNameInput').value.trim();
-  const groupCode = document.getElementById('groupCodeInput').value.trim().toUpperCase();
-  
-  if (!userName || !groupCode) {
-    showToast('Vui lòng nhập Tên và Mã nhóm!', true);
-    return;
-  }
-  
-  const userId = 'usr_' + Date.now();
-  currentUser = { id: userId, name: userName };
-  
-  showToast('Đang kiểm tra mã nhóm...');
-  const res = await apiCall({ action: 'joinGroup', groupCode, userId });
-  
-  if (res && res.status === 'success') {
-    currentGroup = res.group;
-    
-    localStorage.setItem('gs_user', JSON.stringify(currentUser));
-    localStorage.setItem('gs_group', JSON.stringify(currentGroup));
-    
-    // Thêm người dùng mới vào danh sách thành viên của nhóm
-    await apiCall({ action: 'addMember', id: userId, name: userName, groupId: currentGroup.id });
-    
-    showToast('Tham gia nhóm thành công!');
-    document.getElementById('authGroupModal').classList.remove('active');
-    init();
-  } else {
-    showToast(res ? res.message : 'Lỗi tham gia nhóm', true);
-  }
-}
-    // --------------------------------------------------
     let groupId = localStorage.getItem('groupId') || '';
     let groupCode = localStorage.getItem('groupCode') || '';
-    let members = [], transactions = [], tasks = [];
-    let splitMemberCount = 3, fundType = 'thu';
+    let tasks = [], members = [], transactions = [];
+    let fundType = 'chi';
 
-    window.onload = () => {
-      if (groupId) {
-        document.getElementById('authGroupModal').classList.remove('active');
-        loadGroupData();
-      }
+    window.onload = () => { 
+      if (groupId) { 
+        document.getElementById('authGroupModal').classList.remove('active'); 
+        loadGroupData(); 
+      } 
     };
 
     function switchGroupTab(tab) {
@@ -308,131 +212,244 @@ async function handleJoinGroup() {
     async function handleJoinGroup() {
       const userName = document.getElementById('userNameInput').value.trim();
       const code = document.getElementById('groupCodeInput').value.trim().toUpperCase();
-      if (!userName || !code) return alert('Vui lòng nhập đủ thông tin!');
-
-      try {
-        const res = await fetch(`${API_URL}?action=joinGroup&groupCode=${code}&userId=${encodeURIComponent(userName)}`);
-        const data = await res.json();
-        if (data.status === 'success') {
-          saveGroupAndInit(data.group.id, data.group.code);
-        } else alert(data.message);
-      } catch (e) { alert('Lỗi kết nối!'); }
+      if (!userName || !code) return alert('Vui lòng nhập đầy đủ thông tin!');
+      
+      const res = await fetch(`${API_URL}?action=joinGroup&groupCode=${code}&userId=${encodeURIComponent(userName)}`);
+      const data = await res.json();
+      if (data.status === 'success') {
+        saveGroupAndInit(data.group.id, data.group.code);
+      } else {
+        alert(data.message);
+      }
     }
 
     async function handleCreateGroup() {
-      const groupName = document.getElementById('createGroupNameInput').value.trim();
-      const adminName = document.getElementById('adminNameInput').value.trim();
-      if (!groupName || !adminName) return alert('Vui lòng nhập đủ thông tin!');
-
-      try {
-        const res = await fetch(`${API_URL}?action=createGroup&groupName=${encodeURIComponent(groupName)}&userId=${encodeURIComponent(adminName)}`);
-        const data = await res.json();
-        if (data.status === 'success') {
-          alert(`Tạo nhóm thành công! Mã nhóm: ${data.group.code}`);
-          saveGroupAndInit(data.group.id, data.group.code);
-        }
-      } catch (e) { alert('Lỗi tạo nhóm!'); }
+      const gName = document.getElementById('createGroupNameInput').value.trim();
+      const aName = document.getElementById('adminNameInput').value.trim();
+      if (!gName || !aName) return alert('Vui lòng nhập đầy đủ thông tin!');
+      
+      const res = await fetch(`${API_URL}?action=createGroup&groupName=${encodeURIComponent(gName)}&userId=${encodeURIComponent(aName)}`);
+      const data = await res.json();
+      if (data.status === 'success') { 
+        alert('Tạo nhóm thành công! Mã nhóm của bạn là: ' + data.group.code); 
+        saveGroupAndInit(data.group.id, data.group.code); 
+      }
     }
 
     function saveGroupAndInit(gId, gCode) {
-      groupId = gId; groupCode = gCode;
-      localStorage.setItem('groupId', groupId);
+      groupId = gId; 
+      groupCode = gCode;
+      localStorage.setItem('groupId', groupId); 
       localStorage.setItem('groupCode', groupCode);
       document.getElementById('authGroupModal').classList.remove('active');
       loadGroupData();
     }
 
-    function leaveGroup() {
-      if (confirm('Đổi nhóm khác?')) { localStorage.clear(); location.reload(); }
+    function leaveGroup() { 
+      if (confirm('Bạn có chắc chắn muốn thoát khỏi nhóm này?')) { 
+        localStorage.clear(); 
+        location.reload(); 
+      } 
     }
 
     async function loadGroupData() {
       document.getElementById('mainApp').style.display = 'flex';
-      ['displayGroupCode','displayGroupCode2','displayGroupCode3','displayGroupCode4'].forEach(id => {
+      ['displayGroupCode0','displayGroupCode1','displayGroupCode2'].forEach(id => {
         document.getElementById(id).textContent = 'Mã: ' + groupCode;
       });
-
+      
       try {
         const res = await fetch(`${API_URL}?action=getGroupData&groupId=${groupId}`);
         const data = await res.json();
+        tasks = data.tasks || [];
         members = data.members || [];
         transactions = (data.transactions || []).map(t => ({...t, amount: Number(t.amount)||0}));
-        tasks = data.tasks || [];
-      } catch (e) {}
+      } catch (e) {
+        console.error("Lỗi tải dữ liệu:", e);
+      }
       switchScreen(0);
     }
 
     function switchScreen(idx) {
-      ['screen-split','screen-fund','screen-task','screen-member'].forEach((s, i) => {
+      ['screen-dashboard','screen-task','screen-fund'].forEach((s, i) => {
         document.getElementById(s).classList.toggle('active', i === idx);
         document.getElementById('nav-' + i).classList.toggle('active', i === idx);
       });
-      if (idx === 1) renderFund();
-      if (idx === 2) renderTasks();
-      if (idx === 3) renderMembers();
+      if (idx === 0) renderDashboardAndDebt();
+      if (idx === 1) renderTasks();
+      if (idx === 2) renderFund();
     }
 
-    function showToast(msg) {
-      const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2000);
-    }
-    function openModal(id) { document.getElementById(id).classList.add('active'); populateSelects(); }
-    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    /* 🧮 HÀM TÍNH TOÁN CÔNG NỢ CHI TIẾT & DASHBOARD */
+    function renderDashboardAndDebt() {
+      const totalMembers = members.length || 1;
+      const now = new Date();
+      
+      // 1. Tính tổng số tiền chi ra của nhóm
+      const totalChi = transactions.filter(t => t.type === 'chi').reduce((sum, t) => sum + t.amount, 0);
+      const avgSpend = Math.round(totalChi / totalMembers);
 
-    function populateSelects() {
-      const opts = members.map(m => `<option value="${m.id}">${m.name}</option>`).join('') || '<option value="">(Chưa có TV)</option>';
-      document.getElementById('fundMember').innerHTML = opts;
-      document.getElementById('taskAssignee').innerHTML = opts;
+      document.getElementById('dashTotalSpend').textContent = totalChi.toLocaleString('vi-VN') + ' đ';
+      document.getElementById('dashAvgSpend').textContent = avgSpend.toLocaleString('vi-VN') + ' đ';
+
+      // 2. Tính tổng số tiền từng cá nhân đã đứng ra chi
+      const memberPaidMap = {};
+      members.forEach(m => memberPaidMap[m.id] = 0);
+      transactions.forEach(t => {
+        if (t.payerId && memberPaidMap[t.payerId] !== undefined) {
+          memberPaidMap[t.payerId] += t.amount;
+        }
+      });
+
+      // 3. Hiển thị Bảng Công Nợ Chi Tiết
+      const container = document.getElementById('debtCalculationList');
+      if (!members.length) {
+        container.innerHTML = 'Chưa có thành viên nào trong nhóm';
+      } else {
+        container.innerHTML = members.map(m => {
+          const paid = memberPaidMap[m.id] || 0;
+          const diff = paid - avgSpend;
+
+          let statusText = '';
+          if (diff > 0) {
+            statusText = `<span class="debt-receive">Nhận lại: +${diff.toLocaleString('vi-VN')} đ</span>`;
+          } else if (diff < 0) {
+            statusText = `<span class="debt-pay">Cần nộp: ${Math.abs(diff).toLocaleString('vi-VN')} đ</span>`;
+          } else {
+            statusText = `<span class="debt-equal">Đã sòng phẳng (0 đ)</span>`;
+          }
+
+          return `<div style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong style="font-size:14px;">${m.name}</strong>
+              <div style="font-size:11px; color:#757575;">Đã trả: ${paid.toLocaleString('vi-VN')} đ</div>
+            </div>
+            <div>${statusText}</div>
+          </div>`;
+        }).join('');
+      }
+
+      // 4. Cảnh báo Deadline Quá Hạn
+      const alertContainer = document.getElementById('dashAlertList');
+      const lateTasks = tasks.filter(t => t.status !== 'done' && now > new Date(t.deadline));
+      
+      if (!lateTasks.length) {
+        alertContainer.innerHTML = '<div style="color:#2e7d32; font-weight:500;">🎉 Tất cả công việc đang đúng tiến độ!</div>';
+      } else {
+        alertContainer.innerHTML = lateTasks.map(t => `<div style="padding:6px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+          <span><strong>${t.title}</strong> (${t.assigneeName || 'Chưa gán'})</span>
+          <span style="color:#d32f2f; font-weight:700;">Quá hạn</span>
+        </div>`).join('');
+      }
     }
 
-    async function apiCall(data) {
-      fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({...data, groupId}) });
+    /* QUẢN LÝ THU CHI & QUỸ */
+    function setFundType(t) { 
+      fundType = t; 
+      document.getElementById('fundTypeChi').classList.toggle('active', t==='chi'); 
+      document.getElementById('fundTypeThu').classList.toggle('active', t==='thu'); 
     }
 
-    /* CHIA TIỀN */
-    function changeMemberCount(d) { splitMemberCount = Math.max(1, splitMemberCount + d); document.getElementById('memberCount').textContent = splitMemberCount; }
-    function calculateSplit() {
-      const amt = parseFloat(document.getElementById('splitAmount').value) || 0;
-      const note = document.getElementById('splitNote').value || 'Chia tien';
-      const bank = document.getElementById('splitBank').value;
-      const bankNo = document.getElementById('splitBankAccount').value;
-      if (!amt || !bankNo) return showToast('Vui lòng điền đủ thông tin');
-      const perPerson = Math.round(amt / splitMemberCount);
-      const qrUrl = `https://img.vietqr.io/image/${bank}-${bankNo}-compact.png?amount=${perPerson}&addInfo=${encodeURIComponent(note)}`;
-      const resDiv = document.getElementById('splitResult'); resDiv.style.display = 'block';
-      resDiv.innerHTML = `<div class="result-card"><div>Mỗi người chuyển</div><div class="result-amount">${perPerson.toLocaleString('vi-VN')} đ</div><img src="${qrUrl}" class="qr-img"></div>`;
-    }
-
-    /* QUỸ NHÓM */
-    function setFundType(t) { fundType = t; document.getElementById('fundTypeThu').classList.toggle('active', t === 'thu'); document.getElementById('fundTypeChi').classList.toggle('active', t === 'chi'); }
     function renderFund() {
       const balance = transactions.reduce((s, t) => s + (t.type === 'thu' ? t.amount : -t.amount), 0);
-      document.getElementById('fundSummary').innerHTML = `<div>Số dư quỹ</div><div class="fund-balance">${balance.toLocaleString('vi-VN')} đ</div>`;
-      document.getElementById('fundList').innerHTML = transactions.map(t => `<div class="list-item"><div class="content"><div class="title">${t.note}</div></div><div class="trailing">${t.type==='thu'?'+':'-'}${t.amount.toLocaleString('vi-VN')} đ</div></div>`).join('') || '<div class="empty-state">Chưa có giao dịch</div>';
-    }
-    async function addTransaction() {
-      const amt = parseFloat(document.getElementById('fundAmount').value) || 0;
-      if (!amt) return;
-      const t = { id: 't_'+Date.now(), type: fundType, amount: amt, note: document.getElementById('fundNote').value, memberId: document.getElementById('fundMember').value };
-      transactions.push(t); closeModal('fundModal'); renderFund();
-      apiCall({ action: 'addTransaction', ...t });
+      document.getElementById('fundBalance').textContent = balance.toLocaleString('vi-VN') + ' đ';
+      
+      document.getElementById('fundList').innerHTML = transactions.map(t => `<div class="list-item">
+        <div>
+          <div class="title">${t.note}</div>
+          <div class="subtitle">${t.type==='chi' ? 'Người chi: ' + (t.payerName || 'Chưa rõ') : 'Nguồn: Đóng quỹ'}</div>
+        </div>
+        <div style="font-weight:700; color:${t.type==='thu'?'#2e7d32':'#d32f2f'}">
+          ${t.type==='thu'?'+':'-'}${t.amount.toLocaleString('vi-VN')} đ
+        </div>
+      </div>`).join('') || '<div style="text-align:center; padding:32px; color:#999;">Chưa có giao dịch</div>';
     }
 
-    /* CÔNG VIỆC & THÀNH VIÊN */
-    function renderTasks() { document.getElementById('taskList').innerHTML = tasks.map(t => `<div class="list-item"><div class="content"><div class="title">${t.title}</div></div></div>`).join('') || '<div class="empty-state">Chưa có công việc</div>'; }
+    /* QUẢN LÝ CÔNG VIỆC */
+    function renderTasks() {
+      const list = document.getElementById('taskList');
+      if (!tasks.length) return list.innerHTML = '<div style="text-align:center; padding:32px; color:#999;">Chưa có công việc nào</div>';
+      
+      const now = new Date();
+      list.innerHTML = tasks.map(t => {
+        const dl = new Date(t.deadline);
+        let badge = '<span class="badge badge-pending">Đang làm</span>';
+        if (t.status === 'done') {
+          badge = '<span class="badge badge-ontime">Đã xong</span>';
+        } else if (now > dl) {
+          badge = '<span class="badge badge-late">Quá hạn</span>';
+        }
+
+        return `<div class="list-item">
+          <div>
+            <div class="title">${t.title}</div>
+            <div class="subtitle">Làm: ${t.assigneeName || 'Chưa gán'} | Hạn: ${new Date(t.deadline).toLocaleString('vi-VN')}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            ${badge}
+            ${t.status !== 'done' ? `<button class="btn btn-outline" style="padding:4px 8px; font-size:11px;" onclick="completeTask('${t.id}')">Xong</button>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function completeTask(taskId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (task) {
+        task.status = 'done';
+        renderTasks();
+        apiCall({ action: 'completeTask', id: taskId });
+      }
+    }
+
+    /* TIỆN ÍCH MODAL & API */
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+      const opts = members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+      if (id === 'taskModal') document.getElementById('taskAssignee').innerHTML = opts || '<option value="">(Chưa có TV)</option>';
+      if (id === 'fundModal') document.getElementById('fundPayer').innerHTML = opts || '<option value="">(Chưa có TV)</option>';
+    }
+
+    function closeModal(id) { 
+      document.getElementById(id).classList.remove('active'); 
+    }
+
+    async function apiCall(data) { 
+      fetch(API_URL, { 
+        method: 'POST', 
+        mode: 'no-cors', 
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify({...data, groupId}) 
+      }); 
+    }
+
     async function addTask() {
-      const title = document.getElementById('taskTitle').value.trim(); if (!title) return;
-      const t = { id: 'tk_'+Date.now(), title, assigneeId: document.getElementById('taskAssignee').value };
-      tasks.push(t); closeModal('taskModal'); renderTasks();
+      const title = document.getElementById('taskTitle').value.trim();
+      const assigneeId = document.getElementById('taskAssignee').value;
+      const assigneeName = members.find(m => m.id === assigneeId)?.name || '';
+      const deadline = document.getElementById('taskDeadline').value;
+      if (!title || !deadline) return alert('Vui lòng nhập đủ tên việc và deadline!');
+      
+      const t = { id: 'tk_' + Date.now(), title, assigneeId, assigneeName, deadline, status: 'pending' };
+      tasks.push(t); 
+      closeModal('taskModal'); 
+      renderTasks();
       apiCall({ action: 'addTask', ...t });
     }
 
-    function renderMembers() { document.getElementById('memberList').innerHTML = members.map(m => `<div class="list-item"><div class="content"><div class="title">${m.name}</div></div></div>`).join('') || '<div class="empty-state">Chưa có thành viên</div>'; }
-    async function addMember() {
-      const name = document.getElementById('memberName').value.trim(); if (!name) return;
-      const m = { id: 'm_'+Date.now(), name };
-      members.push(m); closeModal('memberModal'); renderMembers();
-      apiCall({ action: 'addMember', ...m });
+    async function addFund() {
+      const amt = parseFloat(document.getElementById('fundAmount').value) || 0;
+      const note = document.getElementById('fundNote').value.trim();
+      const payerId = document.getElementById('fundPayer').value;
+      const payerName = members.find(m => m.id === payerId)?.name || '';
+      if (!amt || !note) return alert('Vui lòng nhập đủ số tiền và nội dung!');
+      
+      const t = { id: 'tr_' + Date.now(), type: fundType, amount: amt, note, payerId, payerName };
+      transactions.push(t); 
+      closeModal('fundModal'); 
+      renderFund(); 
+      renderDashboardAndDebt();
+      apiCall({ action: 'addTransaction', ...t });
     }
   </script>
 </body>
