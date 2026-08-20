@@ -42,7 +42,6 @@
     .list-item .title { font-size: 14px; font-weight: 500; color: #333; }
     .list-item .subtitle { font-size: 12px; color: #757575; margin-top: 2px; }
     
-    /* Huy hiệu Leader & Member */
     .badge-role-admin { background: #ed6c02; color: #fff; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; }
     .badge-role-member { background: #e0e0e0; color: #424242; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; }
 
@@ -88,7 +87,7 @@
   <!-- BỐ CỤC CHÍNH CỦA ỨNG DỤNG -->
   <div id="mainApp" style="display:none; flex-direction:column; min-height:100vh;">
 
-    <!-- TAB 0: DASHBOARD & CÔNG NỢ -->
+    <!-- TAB 0: DASHBOARD -->
     <div class="screen" id="screen-dashboard">
       <div class="app-bar"><span>Dashboard & Công Nợ 📌</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode0"></span></div>
       <div style="flex:1; overflow-y:auto; padding-top: 8px;">
@@ -115,7 +114,7 @@
       </div>
     </div>
 
-    <!-- TAB 1: DANH SÁCH THÀNH VIÊN (MỚI BỔ SUNG) -->
+    <!-- TAB 1: DANH SÁCH THÀNH VIÊN -->
     <div class="screen" id="screen-members">
       <div class="app-bar"><span>Thành Viên Nhóm 👥</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode3"></span></div>
       <div style="flex:1; overflow-y:auto; padding-top: 8px;">
@@ -136,7 +135,7 @@
       <button class="fab" onclick="openModal('taskModal')"><span class="material-icons">add_task</span> Giao việc</button>
     </div>
 
-    <!-- TAB 3: QUẢN LÝ THU CHI & QUỸ -->
+    <!-- TAB 3: QUẢN LÝ THU CHI -->
     <div class="screen" id="screen-fund">
       <div class="app-bar"><span>Quỹ & Giao Dịch 💰</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode2"></span></div>
       <div style="flex:1; overflow-y:auto; padding: 8px;">
@@ -149,7 +148,7 @@
       <button class="fab" onclick="openModal('fundModal')"><span class="material-icons">add</span> Nhập giao dịch</button>
     </div>
 
-    <!-- THANH MENU ĐIỀU HƯỚNG DƯỚI -->
+    <!-- THANH MENU -->
     <nav class="bottom-nav">
       <a class="nav-item active" onclick="switchScreen(0)" id="nav-0"><span class="material-icons">dashboard</span>Tổng quan</a>
       <a class="nav-item" onclick="switchScreen(1)" id="nav-1"><span class="material-icons">people</span>Thành viên</a>
@@ -158,7 +157,7 @@
     </nav>
   </div>
 
-  <!-- MODAL GIAO VIỆC -->
+  <!-- MODALS -->
   <div class="modal-overlay" id="taskModal">
     <div class="modal">
       <h3>Thêm công việc & Deadline</h3>
@@ -172,7 +171,6 @@
     </div>
   </div>
 
-  <!-- MODAL THU CHI -->
   <div class="modal-overlay" id="fundModal">
     <div class="modal">
       <h3>Ghi Nhận Thu Chi / Đóng Quỹ</h3>
@@ -182,7 +180,7 @@
       </div>
       <div class="input-group"><label>Người ứng tiền / Đóng tiền</label><select id="fundPayer"></select></div>
       <div class="input-group"><label>Số tiền (VNĐ)</label><input type="number" id="fundAmount" placeholder="0"></div>
-      <div class="input-group"><label>Nội dung chi / Thu</label><input type="text" id="fundNote" placeholder="Ví dụ: In ấn tài liệu, Mua trà sữa"></div>
+      <div class="input-group"><label>Nội dung chi / Thu</label><input type="text" id="fundNote" placeholder="Ví dụ: In ấn tài liệu"></div>
       <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
         <button class="btn btn-outline" onclick="closeModal('fundModal')">Hủy</button>
         <button class="btn btn-primary" onclick="addFund()">Lưu giao dịch</button>
@@ -191,7 +189,8 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxzPc_v8tFbvgRrObjMpB0xT884arkHZ1KXkJTsqbcLW1rQ_Yv0Tb9RHnlpwjQfO8RBsQ/exec';
+    // DÁN ĐÚNG URL WEB APP CỦA BẠN VÀO DÒNG DƯỚI DÂY:
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxsBa_XVpvUv_r2SdhaP7FRaWUDlIKQaBrD3Hvcdm9dO4y2oE9oTORWaQdDwqa2itQA_A/exec';
 
     let groupId = localStorage.getItem('groupId') || '';
     let groupCode = localStorage.getItem('groupCode') || '';
@@ -204,6 +203,18 @@
         loadGroupData(); 
       } 
     };
+
+    function updateGroupCodeUI(code) {
+      if (!code) return;
+      groupCode = code.toUpperCase();
+      localStorage.setItem('groupCode', groupCode);
+      ['displayGroupCode0','displayGroupCode1','displayGroupCode2','displayGroupCode3'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = 'Mã: ' + groupCode;
+      });
+      const showEl = document.getElementById('memberGroupCodeShow');
+      if (showEl) showEl.textContent = groupCode;
+    }
 
     function switchGroupTab(tab) {
       const isJoin = tab === 'join';
@@ -218,12 +229,16 @@
       const code = document.getElementById('groupCodeInput').value.trim().toUpperCase();
       if (!userName || !code) return alert('Vui lòng nhập đầy đủ thông tin!');
       
-      const res = await fetch(`${API_URL}?action=joinGroup&groupCode=${code}&userId=${encodeURIComponent(userName)}`);
-      const data = await res.json();
-      if (data.status === 'success') {
-        saveGroupAndInit(data.group.id, data.group.code);
-      } else {
-        alert(data.message);
+      try {
+        const res = await fetch(`${API_URL}?action=joinGroup&groupCode=${code}&userId=${encodeURIComponent(userName)}`);
+        const data = await res.json();
+        if (data.status === 'success') {
+          saveGroupAndInit(data.group.id, data.group.code);
+        } else {
+          alert(data.message);
+        }
+      } catch (e) {
+        alert('Lỗi kết nối tới Server, vui lòng thử lại!');
       }
     }
 
@@ -232,19 +247,25 @@
       const aName = document.getElementById('adminNameInput').value.trim();
       if (!gName || !aName) return alert('Vui lòng nhập đầy đủ thông tin!');
       
-      const res = await fetch(`${API_URL}?action=createGroup&groupName=${encodeURIComponent(gName)}&userId=${encodeURIComponent(aName)}`);
-      const data = await res.json();
-      if (data.status === 'success') { 
-        alert('Tạo nhóm thành công! Mã nhóm của bạn là: ' + data.group.code); 
-        saveGroupAndInit(data.group.id, data.group.code); 
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'createGroup', groupName: gName, userId: aName })
+        });
+        const data = await res.json();
+        if (data.status === 'success') { 
+          alert('Tạo nhóm thành công! Mã nhóm của bạn là: ' + data.group.code); 
+          saveGroupAndInit(data.group.id, data.group.code); 
+        }
+      } catch (e) {
+        alert('Lỗi tạo nhóm, vui lòng kiểm tra lại!');
       }
     }
 
     function saveGroupAndInit(gId, gCode) {
       groupId = gId; 
-      groupCode = gCode;
       localStorage.setItem('groupId', groupId); 
-      localStorage.setItem('groupCode', groupCode);
+      updateGroupCodeUI(gCode);
       document.getElementById('authGroupModal').classList.remove('active');
       loadGroupData();
     }
@@ -258,17 +279,17 @@
 
     async function loadGroupData() {
       document.getElementById('mainApp').style.display = 'flex';
-      ['displayGroupCode0','displayGroupCode1','displayGroupCode2','displayGroupCode3'].forEach(id => {
-        document.getElementById(id).textContent = 'Mã: ' + groupCode;
-      });
-      document.getElementById('memberGroupCodeShow').textContent = groupCode;
-      
+      updateGroupCodeUI(groupCode);
+
       try {
         const res = await fetch(`${API_URL}?action=getGroupData&groupId=${groupId}`);
         const data = await res.json();
-        tasks = data.tasks || [];
-        members = data.members || [];
-        transactions = (data.transactions || []).map(t => ({...t, amount: Number(t.amount)||0}));
+        if (data.status === 'success') {
+          tasks = data.tasks || [];
+          members = data.members || [];
+          transactions = (data.transactions || []).map(t => ({...t, amount: Number(t.amount)||0}));
+          if (data.groupCode) updateGroupCodeUI(data.groupCode);
+        }
       } catch (e) {
         console.error("Lỗi tải dữ liệu:", e);
       }
@@ -286,7 +307,6 @@
       if (idx === 3) renderFund();
     }
 
-    /* 👥 HIỂN THỊ DANH SÁCH THÀNH VIÊN VÀ LEADER */
     function renderMembers() {
       const container = document.getElementById('membersList');
       if (!members.length) {
@@ -303,7 +323,7 @@
         return `<div class="list-item">
           <div style="display:flex; align-items:center; gap:10px;">
             <div style="width:36px; height:36px; border-radius:50%; background:${isAdmin?'#fff3e0':'#e1f5fe'}; color:${isAdmin?'#e65100':'#0288d1'}; display:flex; align-items:center; justify-content:center; font-weight:700;">
-              ${m.name.charAt(0).toUpperCase()}
+              ${(m.name || 'U').charAt(0).toUpperCase()}
             </div>
             <div>
               <div class="title">${m.name}</div>
@@ -320,7 +340,6 @@
       alert('Đã sao chép mã nhóm: ' + groupCode);
     }
 
-    /* DASHBOARD & CÔNG NỢ */
     function renderDashboardAndDebt() {
       const totalMembers = members.length || 1;
       const now = new Date();
