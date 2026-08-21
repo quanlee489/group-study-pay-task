@@ -13,7 +13,6 @@
     body { font-family: 'Roboto', sans-serif; background: #f4f6f9; min-height: 100vh; display: flex; flex-direction: column; }
     .net-status { background: #323232; color: #fff; text-align: center; font-size: 11px; padding: 4px; display: none; font-weight: 500; }
     .net-status.offline { background: #d32f2f; display: block; }
-    .net-status.syncing { background: #f57c00; display: block; }
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.08); z-index: 100; }
     .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 0; cursor: pointer; color: #757575; text-decoration: none; font-size: 11px; }
     .nav-item.active { color: #0288d1; font-weight: 500; }
@@ -71,9 +70,9 @@
 </head>
 <body>
 
-  <div id="netStatus" class="net-status">⚠️ Không có kết nối Internet - Đang chế độ Offline</div>
+  <div id="netStatus" class="net-status">⚠️ Không có kết nối Internet</div>
 
-  <!-- MODAL DANG NHAP -->
+  <!-- MODAL ĐĂNG NHẬP / TẠO NHÓM -->
   <div class="modal-overlay active" id="authGroupModal">
     <div class="modal">
       <h3 style="margin-bottom:12px;">Quản Lý Nhóm & Chia Tiền 🔐</h3>
@@ -145,7 +144,7 @@
       </div>
     </div>
 
-    <!-- TAB 1: THANH VIEN -->
+    <!-- TAB 1: THÀNH VIÊN -->
     <div class="screen" id="screen-members">
       <div class="app-bar"><span>Thành Viên Nhóm 👥</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode3"></span></div>
       <div style="flex:1; overflow-y:auto; padding-top: 8px;">
@@ -159,7 +158,7 @@
       </div>
     </div>
 
-    <!-- TAB 2: CONG VIEC -->
+    <!-- TAB 2: CÔNG VIỆC -->
     <div class="screen" id="screen-task">
       <div class="app-bar"><span>Công Việc & Tiến Độ 📚</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode1"></span></div>
       <div style="flex:1; overflow-y:auto; padding-top: 8px;">
@@ -184,7 +183,7 @@
       <button class="fab" onclick="openModal('taskModal')"><span class="material-icons">add_task</span> Giao việc</button>
     </div>
 
-    <!-- TAB 3: QUY NHOM -->
+    <!-- TAB 3: QUỸ NHÓM -->
     <div class="screen" id="screen-fund">
       <div class="app-bar"><span>Lịch Sử Thu & Chi 💰</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode2"></span></div>
       <div style="flex:1; overflow-y:auto; padding: 8px;">
@@ -206,7 +205,7 @@
     </nav>
   </div>
 
-  <!-- MODALS -->
+  <!-- MODALS CẤU HÌNH NHANH -->
   <div class="modal-overlay" id="qrModal">
     <div class="modal">
       <h3 style="color:#2e7d32; margin-bottom:8px;">Mã Quét VietQR Thanh Toán</h3>
@@ -278,8 +277,8 @@
   </div>
 
   <script>
-    // THAY LINK WEB APP GOOGLE APPS SCRIPT MỚI NHẤT VÀO ĐÂY:
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxEha32bqVD6kJPWE2gJmfCNa8CvYNwEQdNm5hfozICG5k5CCVY6kwusqo-zSaCREJ91A/exec';
+    // DÁN LINK WEB APP KẾT THÚC BẰNG /exec VÀO ĐÂY:
+    const API_URL = 'THAY_URL_WEB_APP_MOI_CUA_BAN_VAO_DAY';
 
     let groupId = localStorage.getItem('groupId') || '';
     let groupCode = localStorage.getItem('groupCode') || '';
@@ -337,6 +336,7 @@
       } catch (e) { alert('Mạng lỗi! Hãy kiểm tra kết nối.'); }
     }
 
+    // TẠO NHÓM ĐÃ SỬA DÙNG text/plain TRÁNH LỖI CORS PREFLIGHT
     async function handleCreateGroup() {
       const gName = document.getElementById('createGroupNameInput').value.trim();
       const aName = document.getElementById('adminNameInput').value.trim();
@@ -345,14 +345,20 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'createGroup', groupName: gName, userId: aName })
         });
         const data = await res.json();
         if (data.status === 'success') {
           alert('Tạo nhóm thành công! Mã nhóm: ' + data.group.code);
           saveGroupAndInit(data.group.id, data.group.code, data.group.name);
-        } else alert(data.message);
-      } catch (e) { alert('Mạng lỗi! Không thể tạo nhóm.'); }
+        } else {
+          alert('Lỗi: ' + data.message);
+        }
+      } catch (e) {
+        console.error(e);
+        alert('Không thể kết nối đến Server! Vui lòng kiểm tra API_URL.');
+      }
     }
 
     function saveGroupAndInit(gId, gCode, gName) {
@@ -392,7 +398,7 @@
           }
           saveLocalCache();
         }
-      } catch (e) { console.error("Dùng bản lưu tạm offline!"); }
+      } catch (e) { console.error("Sử dụng bản lưu offline"); }
 
       switchScreen(0);
     }
@@ -506,7 +512,6 @@
       `).join('');
     }
 
-    // RENDER TASKS (ĐÃ THÊM NÚT XÓA TASK)
     function renderTasks() {
       const { doingCount, doneCount, lateCount } = processTaskStatuses();
       const total = tasks.length;
@@ -605,7 +610,7 @@
       closeModal('taskModal');
       document.getElementById('taskTitle').value = '';
 
-      fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addTask', ...newTask }) }).catch(e=>console.error(e));
+      fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'addTask', ...newTask }) }).catch(e=>console.error(e));
     }
 
     async function updateTaskStatus(taskId, newStatus) {
@@ -615,23 +620,17 @@
         saveLocalCache();
         renderTasks();
         renderDashboardAndDebt();
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTaskStatus', taskId: taskId, status: newStatus }) }).catch(e=>console.error(e));
+        fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'updateTaskStatus', taskId: taskId, status: newStatus }) }).catch(e=>console.error(e));
       }
     }
 
-    // XÓA TASK
     async function deleteTask(taskId) {
       if (!confirm('Bạn có chắc chắn muốn xóa công việc này?')) return;
-
       tasks = tasks.filter(t => t.id !== taskId);
       saveLocalCache();
       renderTasks();
       renderDashboardAndDebt();
-
-      fetch(API_URL, { 
-        method: 'POST', 
-        body: JSON.stringify({ action: 'deleteTask', taskId: taskId }) 
-      }).catch(e => console.error(e));
+      fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'deleteTask', taskId: taskId }) }).catch(e => console.error(e));
     }
 
     async function addFund() {
@@ -640,7 +639,7 @@
       const amount = Number(document.getElementById('fundAmount').value);
       const note = document.getElementById('fundNote').value.trim();
 
-      if (!amount || amount <= 0) return alert('Vui lòng nhập số tiền hợp lệ!');
+      if (!amount || amount <= 0) return alert('Vui lòng nhập số tiền!');
 
       const newTrans = {
         id: 'TRN_' + Date.now(),
@@ -661,7 +660,7 @@
       document.getElementById('fundAmount').value = '';
       document.getElementById('fundNote').value = '';
 
-      fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addTransaction', ...newTrans }) }).catch(e=>console.error(e));
+      fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'addTransaction', ...newTrans }) }).catch(e=>console.error(e));
     }
 
     async function deleteTransaction(transId) {
@@ -672,7 +671,7 @@
         saveLocalCache();
         renderFund();
         renderDashboardAndDebt();
-        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteTransaction', transactionId: transId }) }).catch(e=>console.error(e));
+        fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'deleteTransaction', transactionId: transId }) }).catch(e=>console.error(e));
       }
     }
 
@@ -688,7 +687,7 @@
       renderBankInfoDisplay();
       closeModal('bankModal');
 
-      fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'saveBankConfig', groupId: groupId, ...bankConfig }) }).catch(e=>console.error(e));
+      fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'saveBankConfig', groupId: groupId, ...bankConfig }) }).catch(e=>console.error(e));
     }
 
     function renderBankInfoDisplay() {
