@@ -278,8 +278,8 @@
   </div>
 
   <script>
-    // DÁN URL WEB APP GOOGLE APPS SCRIPT CỦA BẠN VÀO ĐÂY:
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzIlLCF1ZBXKa1Mm2IIVDAPhNo3HHzRodqDmu-renGXdu4TDC3Bx4FLwrSbeLd-L4hmJA/exec';
+    // THAY LINK WEB APP GOOGLE APPS SCRIPT MỚI NHẤT VÀO ĐÂY:
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxEha32bqVD6kJPWE2gJmfCNa8CvYNwEQdNm5hfozICG5k5CCVY6kwusqo-zSaCREJ91A/exec';
 
     let groupId = localStorage.getItem('groupId') || '';
     let groupCode = localStorage.getItem('groupCode') || '';
@@ -392,7 +392,7 @@
           }
           saveLocalCache();
         }
-      } catch (e) { console.error("Dùng bản lưu tạm offine!"); }
+      } catch (e) { console.error("Dùng bản lưu tạm offline!"); }
 
       switchScreen(0);
     }
@@ -506,6 +506,7 @@
       `).join('');
     }
 
+    // RENDER TASKS (ĐÃ THÊM NÚT XÓA TASK)
     function renderTasks() {
       const { doingCount, doneCount, lateCount } = processTaskStatuses();
       const total = tasks.length;
@@ -530,12 +531,15 @@
             <div class="title" style="${st === 'done' ? 'text-decoration:line-through; color:#9e9e9e;' : ''}">${t.title}</div>
             <div class="subtitle">Làm: <strong>${t.assigneeName || 'Chưa gán'}</strong> | Hạn: ${deadlineText}</div>
           </div>
-          <div style="display:flex; align-items:center; gap:8px;">
+          <div style="display:flex; align-items:center; gap:6px;">
             ${badgeHTML}
             <select class="task-select-status" onchange="updateTaskStatus('${t.id}', this.value)">
               <option value="doing" ${st === 'doing' ? 'selected' : ''}>Đang làm</option>
               <option value="done" ${st === 'done' ? 'selected' : ''}>Hoàn thành</option>
             </select>
+            <button class="btn-delete-icon" onclick="deleteTask('${t.id}')">
+              <span class="material-icons" style="font-size:18px;">delete</span>
+            </button>
           </div>
         </div>`;
       }).join('');
@@ -566,8 +570,8 @@
               <span class="material-icons" style="font-size:18px;">delete</span>
             </button>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     }
 
     function filterFund(type) {
@@ -613,6 +617,21 @@
         renderDashboardAndDebt();
         fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTaskStatus', taskId: taskId, status: newStatus }) }).catch(e=>console.error(e));
       }
+    }
+
+    // XÓA TASK
+    async function deleteTask(taskId) {
+      if (!confirm('Bạn có chắc chắn muốn xóa công việc này?')) return;
+
+      tasks = tasks.filter(t => t.id !== taskId);
+      saveLocalCache();
+      renderTasks();
+      renderDashboardAndDebt();
+
+      fetch(API_URL, { 
+        method: 'POST', 
+        body: JSON.stringify({ action: 'deleteTask', taskId: taskId }) 
+      }).catch(e => console.error(e));
     }
 
     async function addFund() {
