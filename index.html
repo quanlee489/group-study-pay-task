@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GroupStudy - Chia Tiền & Quản Lý Nhóm</title>
+  <title>GroupStudy - Dashboard & Quản Lý Nhóm</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
@@ -24,6 +24,12 @@
     .card { background: #fff; border-radius: 12px; padding: 16px; margin: 8px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     .card-title { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
     
+    /* DASHBOARD TỔNG QUAN CẢNH BÁO */
+    .dashboard-overview-card { background: linear-gradient(135deg, #0288d1, #01579b); color: #fff; border-radius: 14px; padding: 16px; margin: 12px 16px 4px 16px; box-shadow: 0 4px 12px rgba(2,136,209,0.3); }
+    .dash-header-title { font-size: 18px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .dash-alert-box { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px); padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+    .dash-alert-box.has-warning { background: #ffebee; color: #c62828; font-weight: 700; }
+
     .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 8px 16px; }
     .stat-card { background: #fff; border-radius: 12px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; }
     .stat-card .val { font-size: 18px; font-weight: 700; margin-top: 4px; }
@@ -48,6 +54,11 @@
     .debt-receive { color: #2e7d32; font-weight: 700; font-size: 13px; }
     .debt-pay { color: #d32f2f; font-weight: 700; font-size: 13px; }
     
+    /* BADGE TRẠNG THÁI CÔNG VIỆC VA THU CHI */
+    .badge-status-doing { background: #e3f2fd; color: #0288d1; padding: 4px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+    .badge-status-done { background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+    .badge-status-late { background: #ffebee; color: #c62828; padding: 4px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+    
     .badge-type-thu { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
     .badge-type-chi { background: #ffebee; color: #c62828; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
 
@@ -58,18 +69,15 @@
     .segmented button { flex: 1; padding: 8px; border: none; background: #fff; cursor: pointer; font-size: 13px; color: #0288d1; }
     .segmented button.active { background: #0288d1; color: #fff; }
 
-    /* KHUNG HIỂN THỊ MÃ QR TỰ ĐỘNG TRÊN TRANG TRỦ */
     .qr-card-box { text-align: center; background: #fff; border-radius: 10px; padding: 12px; margin-top: 10px; border: 1px dashed #a5d6a7; }
     .qr-card-img { width: 180px; height: 180px; object-fit: contain; margin: 6px auto; display: block; border-radius: 8px; border: 1px solid #eee; }
 
-    /* BIỂU ĐỒ HÌNH TRÒN */
     .progress-chart-container { display: flex; align-items: center; justify-content: space-around; padding: 8px 0; }
     .donut-chart { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#2e7d32 0deg, #e0e0e0 0deg); display: flex; align-items: center; justify-content: center; }
     .donut-chart-center { width: 74px; height: 74px; background: #fff; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .progress-percent { font-size: 18px; font-weight: 700; color: #2e7d32; }
     .progress-label { font-size: 10px; color: #757575; }
-    .task-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: #2e7d32; }
-    .task-done-title { text-decoration: line-through; color: #9e9e9e !important; }
+    .task-select-status { padding: 4px 6px; border-radius: 6px; border: 1px solid #ccc; font-size: 11px; font-weight: 700; outline: none; }
   </style>
 </head>
 <body>
@@ -97,10 +105,24 @@
 
   <div id="mainApp" style="display:none; flex-direction:column; min-height:100vh;">
 
-    <!-- TAB 0: CHIA TIỀN & CÔNG NỢ -->
+    <!-- TAB 0: DASHBOARD TỔNG QUAN & CHIA TIỀN -->
     <div class="screen" id="screen-dashboard">
-      <div class="app-bar"><span>Chia Tiền & Công Nợ 📌</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode0"></span></div>
-      <div style="flex:1; overflow-y:auto; padding-top: 8px;">
+      <div class="app-bar"><span>Trang Chủ & Chia Tiền 📌</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode0"></span></div>
+      <div style="flex:1; overflow-y:auto; padding-top: 4px;">
+        
+        <!-- DASHBOARD TỔNG QUAN DÀNH CHO NHÓM -->
+        <div class="dashboard-overview-card">
+          <div class="dash-header-title">
+            <span id="dashGroupName">Đang tải tên nhóm...</span>
+            <span style="font-size:12px; opacity:0.9;" id="dashMemberCount">👥 0 thành viên</span>
+          </div>
+          <div style="font-size:12px; opacity:0.85;">Mã nhóm: <strong id="dashGroupCode">------</strong></div>
+          <div id="dashTaskWarningBox" class="dash-alert-box">
+            <span class="material-icons" style="font-size:18px;">notifications_active</span>
+            <span id="dashTaskWarningText">Đang kiểm tra tiến độ công việc...</span>
+          </div>
+        </div>
+
         <div class="stats-grid">
           <div class="stat-card">
             <span class="lbl">Tổng chi tiêu cả nhóm</span>
@@ -120,7 +142,6 @@
           </div>
           <div id="bankInfoDisplay" style="font-size:12px; color:#333;">Chưa thiết lập số tài khoản nhận tiền</div>
           
-          <!-- HIỂN THỊ MÃ VIETQR TRỰC TIẾP -->
           <div id="qrCardBox" class="qr-card-box" style="display:none;">
             <div style="font-size:11px; font-weight:700; color:#2e7d32;">MÃ VIETQR QUÉT CHUYỂN TIỀN NHANH</div>
             <img id="mainVietQrImg" class="qr-card-img" src="" alt="Mã VietQR">
@@ -165,10 +186,10 @@
                 <span class="progress-label">Tiến độ</span>
               </div>
             </div>
-            <div style="font-size:13px; line-height:1.8;">
-              <div>🟢 Đã xong: <strong id="tasksDoneCount" style="color:#2e7d32;">0</strong> cv</div>
-              <div>⚪ Chưa xong: <strong id="tasksPendingCount" style="color:#d32f2f;">0</strong> cv</div>
-              <div>📊 Tổng cộng: <strong id="tasksTotalCount">0</strong> công việc</div>
+            <div style="font-size:12px; line-height:1.8;">
+              <div>🟢 Xong: <strong id="tasksDoneCount" style="color:#2e7d32;">0</strong> cv</div>
+              <div>🔵 Đang làm: <strong id="tasksDoingCount" style="color:#0288d1;">0</strong> cv</div>
+              <div>🔴 Trễ hạn: <strong id="tasksLateCount" style="color:#d32f2f;">0</strong> cv</div>
             </div>
           </div>
         </div>
@@ -192,10 +213,10 @@
     </div>
 
     <nav class="bottom-nav">
-      <a class="nav-item active" onclick="switchScreen(0)" id="nav-0"><span class="material-icons">calculate</span>Chia tiền</a>
+      <a class="nav-item active" onclick="switchScreen(0)" id="nav-0"><span class="material-icons">dashboard</span>Trang chủ</a>
       <a class="nav-item" onclick="switchScreen(1)" id="nav-1"><span class="material-icons">people</span>Thành viên</a>
       <a class="nav-item" onclick="switchScreen(2)" id="nav-2"><span class="material-icons">task_alt</span>Công việc</a>
-      <a class="nav-item" onclick="switchScreen(3)" id="nav-3"><span class="material-icons">receipt_long</span>Lịch sử Thu/Chi</a>
+      <a class="nav-item" onclick="switchScreen(3)" id="nav-3"><span class="material-icons">receipt_long</span>Thu/Chi</a>
     </nav>
   </div>
 
@@ -275,10 +296,11 @@
 
   <script>
     // DÁN ĐÚNG WEB APP URL CỦA EM VÀO DÒNG DƯỚI ĐÂY:
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxjqWN1OoNZwyTWwRPWDvC2lEZs90-2u09dgihooCHYCe08iJtWaTKIZg5iHwCEbjs83g/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxGgq0K3EzXXv5d5goR3akfEktGJQss4JSSJLqSl6PiNGJvRzg4X2PIY26uZoibO8OWLg/exec';
 
     let groupId = localStorage.getItem('groupId') || '';
     let groupCode = localStorage.getItem('groupCode') || '';
+    let groupName = localStorage.getItem('groupName') || 'Nhóm Học Tập';
     let tasks = [], members = [], transactions = [];
     let bankConfig = JSON.parse(localStorage.getItem('bankConfig')) || { bank: 'MB', account: '', name: '' };
     let currentFundFilter = 'all';
@@ -300,6 +322,7 @@
         if (el) el.textContent = 'Mã: ' + groupCode;
       });
       document.getElementById('memberGroupCodeShow').textContent = groupCode;
+      document.getElementById('dashGroupCode').textContent = groupCode;
     }
 
     function switchGroupTab(tab) {
@@ -318,7 +341,7 @@
       try {
         const res = await fetch(`${API_URL}?action=joinGroup&groupCode=${code}&userId=${encodeURIComponent(userName)}`);
         const data = await res.json();
-        if (data.status === 'success') saveGroupAndInit(data.group.id, data.group.code);
+        if (data.status === 'success') saveGroupAndInit(data.group.id, data.group.code, data.group.name);
         else alert(data.message);
       } catch (e) { alert('Lỗi kết nối tới Server!'); }
     }
@@ -336,14 +359,16 @@
         const data = await res.json();
         if (data.status === 'success') { 
           alert('Tạo nhóm thành công! Mã nhóm: ' + data.group.code); 
-          saveGroupAndInit(data.group.id, data.group.code); 
+          saveGroupAndInit(data.group.id, data.group.code, data.group.name); 
         }
       } catch (e) { alert('Lỗi tạo nhóm!'); }
     }
 
-    function saveGroupAndInit(gId, gCode) {
+    function saveGroupAndInit(gId, gCode, gName) {
       groupId = gId; 
+      groupName = gName || 'Nhóm Học Tập';
       localStorage.setItem('groupId', groupId); 
+      localStorage.setItem('groupName', groupName); 
       updateGroupCodeUI(gCode);
       document.getElementById('authGroupModal').classList.remove('active');
       loadGroupData();
@@ -367,6 +392,7 @@
           tasks = data.tasks || [];
           members = data.members || [];
           transactions = (data.transactions || []).map(t => ({...t, amount: Number(t.amount)||0}));
+          if (data.groupName) { groupName = data.groupName; localStorage.setItem('groupName', groupName); }
           if (data.groupCode) updateGroupCodeUI(data.groupCode);
           if (data.bankConfig) {
             bankConfig = data.bankConfig;
@@ -389,7 +415,48 @@
       if (idx === 3) renderFund();
     }
 
+    // TÍNH TOÁN CÔNG VIỆC TRỄ HẠN ĐỘNG VÀ UPDATE DASHBOARD
+    function processTaskStatuses() {
+      const now = new Date();
+      let pendingOrLateCount = 0;
+      let doingCount = 0, doneCount = 0, lateCount = 0;
+
+      tasks.forEach(t => {
+        let currentStatus = t.status || 'doing';
+        if (currentStatus !== 'done') {
+          if (t.deadline && new Date(t.deadline) < now) {
+            currentStatus = 'late';
+          } else {
+            currentStatus = 'doing';
+          }
+          pendingOrLateCount++;
+        }
+        t.calculatedStatus = currentStatus;
+
+        if (currentStatus === 'done') doneCount++;
+        else if (currentStatus === 'late') lateCount++;
+        else doingCount++;
+      });
+
+      return { pendingOrLateCount, doingCount, doneCount, lateCount };
+    }
+
     function renderDashboardAndDebt() {
+      document.getElementById('dashGroupName').textContent = groupName;
+      document.getElementById('dashMemberCount').textContent = `👥 ${members.length} thành viên`;
+
+      const { pendingOrLateCount } = processTaskStatuses();
+      const alertBox = document.getElementById('dashTaskWarningBox');
+      const alertText = document.getElementById('dashTaskWarningText');
+
+      if (pendingOrLateCount > 0) {
+        alertBox.className = 'dash-alert-box has-warning';
+        alertText.textContent = `Có ${pendingOrLateCount} công việc chưa làm / trễ deadline!`;
+      } else {
+        alertBox.className = 'dash-alert-box';
+        alertText.textContent = '🎉 Tất cả công việc đã hoàn thành xuất sắc!';
+      }
+
       const totalMembers = members.length || 1;
       const totalChi = transactions.filter(t => t.type === 'chi').reduce((sum, t) => sum + t.amount, 0);
       const avgSpend = Math.round(totalChi / totalMembers);
@@ -401,13 +468,12 @@
       members.forEach(m => memberPaidMap[m.id] = 0);
       transactions.forEach(t => {
         if (t.payerId && memberPaidMap[t.payerId] !== undefined) {
-          if (t.type === 'chi') memberPaidMap[t.payerId] += t.amount;
-          if (t.type === 'thu') memberPaidMap[t.payerId] += t.amount;
+          memberPaidMap[t.payerId] += t.amount;
         }
       });
 
       const container = document.getElementById('debtCalculationList');
-      if (!members.length) return container.innerHTML = 'Chưa có thành viên nào';
+      if (!members.length) return container.innerHTML = 'Chưa có dữ liệu giao dịch';
 
       container.innerHTML = members.map(m => {
         const paid = memberPaidMap[m.id] || 0;
@@ -436,6 +502,56 @@
           ${actionUI}
         </div>`;
       }).join('');
+    }
+
+    function renderTasks() {
+      const { doingCount, doneCount, lateCount } = processTaskStatuses();
+      const total = tasks.length;
+      const percent = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+
+      document.getElementById('taskPercentText').textContent = percent + '%';
+      document.getElementById('tasksDoneCount').textContent = doneCount;
+      document.getElementById('tasksDoingCount').textContent = doingCount;
+      document.getElementById('tasksLateCount').textContent = lateCount;
+
+      document.getElementById('taskDonutChart').style.background = `conic-gradient(#2e7d32 0deg ${percent * 3.6}deg, #e0e0e0 ${percent * 3.6}deg 360deg)`;
+
+      const list = document.getElementById('taskList');
+      if (!total) return list.innerHTML = '<div style="text-align:center; padding:32px; color:#999;">Chưa có công việc nào</div>';
+      
+      list.innerHTML = tasks.map(t => {
+        const st = t.calculatedStatus;
+        let badgeHTML = '';
+        if (st === 'done') badgeHTML = '<span class="badge-status-done">Xong</span>';
+        else if (st === 'late') badgeHTML = '<span class="badge-status-late">Trễ hạn</span>';
+        else badgeHTML = '<span class="badge-status-doing">Đang làm</span>';
+
+        const deadlineText = t.deadline ? new Date(t.deadline).toLocaleString('vi-VN', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'}) : 'Không có';
+
+        return `<div class="list-item">
+          <div>
+            <div class="title" style="${st === 'done' ? 'text-decoration:line-through; color:#9e9e9e;' : ''}">${t.title}</div>
+            <div class="subtitle">Làm: <strong>${t.assigneeName || 'Chưa gán'}</strong> | Hạn: ${deadlineText}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            ${badgeHTML}
+            <select class="task-select-status" onchange="changeTaskStatus('${t.id}', this.value)">
+              <option value="doing" ${st==='doing'?'selected':''}>Đang làm</option>
+              <option value="done" ${st==='done'?'selected':''}>Xong</option>
+              <option value="late" ${st==='late'?'selected':''}>Trễ hạn</option>
+            </select>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function changeTaskStatus(taskId, newStatus) {
+      const task = tasks.find(t => t.id === taskId);
+      if (task) {
+        task.status = newStatus;
+        renderTasks();
+        apiCall({ action: 'updateTaskStatus', taskId: taskId, status: newStatus });
+      }
     }
 
     function saveBankConfig() {
@@ -485,46 +601,6 @@
         Ngân hàng: <strong>${bankConfig.bank} - ${bankConfig.account}</strong>
       `;
       openModal('qrModal');
-    }
-
-    function renderTasks() {
-      const total = tasks.length;
-      const doneCount = tasks.filter(t => t.status === 'done').length;
-      const pendingCount = total - doneCount;
-      const percent = total > 0 ? Math.round((doneCount / total) * 100) : 0;
-
-      document.getElementById('taskPercentText').textContent = percent + '%';
-      document.getElementById('tasksDoneCount').textContent = doneCount;
-      document.getElementById('tasksPendingCount').textContent = pendingCount;
-      document.getElementById('tasksTotalCount').textContent = total;
-
-      document.getElementById('taskDonutChart').style.background = `conic-gradient(#2e7d32 0deg ${percent * 3.6}deg, #e0e0e0 ${percent * 3.6}deg 360deg)`;
-
-      const list = document.getElementById('taskList');
-      if (!total) return list.innerHTML = '<div style="text-align:center; padding:32px; color:#999;">Chưa có công việc nào</div>';
-      
-      list.innerHTML = tasks.map(t => {
-        const isDone = t.status === 'done';
-        return `<div class="list-item">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <input type="checkbox" class="task-checkbox" ${isDone ? 'checked' : ''} onchange="toggleTaskStatus('${t.id}', this.checked)">
-            <div>
-              <div class="title ${isDone ? 'task-done-title' : ''}">${t.title}</div>
-              <div class="subtitle">Làm: <strong>${t.assigneeName || 'Chưa gán'}</strong></div>
-            </div>
-          </div>
-          <div>${isDone ? '<span class="badge-type-thu">Xong</span>' : '<span class="badge-type-chi">Đang làm</span>'}</div>
-        </div>`;
-      }).join('');
-    }
-
-    function toggleTaskStatus(taskId, isChecked) {
-      const task = tasks.find(t => t.id === taskId);
-      if (task) {
-        task.status = isChecked ? 'done' : 'pending';
-        renderTasks();
-        apiCall({ action: 'updateTaskStatus', taskId: taskId, status: task.status });
-      }
     }
 
     function renderMembers() {
@@ -610,10 +686,11 @@
       const deadline = document.getElementById('taskDeadline').value;
       if (!title || !deadline) return alert('Vui lòng nhập đủ thông tin!');
       
-      const t = { id: 'tk_' + Date.now(), title, assigneeId, assigneeName, deadline, status: 'pending' };
+      const t = { id: 'tk_' + Date.now(), title, assigneeId, assigneeName, deadline, status: 'doing' };
       tasks.push(t); 
       closeModal('taskModal'); 
       renderTasks();
+      renderDashboardAndDebt();
       apiCall({ action: 'addTask', ...t });
     }
 
