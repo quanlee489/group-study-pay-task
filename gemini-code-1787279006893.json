@@ -1,0 +1,20 @@
+{
+  "name": "GroupStudy - Quản Lý Nhóm",
+  "short_name": "GroupStudy",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0288d1",
+  "theme_color": "#0288d1",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3588/3588658.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3588/3588658.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
