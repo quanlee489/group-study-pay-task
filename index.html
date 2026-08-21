@@ -48,8 +48,8 @@
     .debt-receive { color: #2e7d32; font-weight: 700; font-size: 13px; }
     .debt-pay { color: #d32f2f; font-weight: 700; font-size: 13px; }
     
-    .badge-role-admin { background: #ed6c02; color: #fff; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; }
-    .badge-role-member { background: #e0e0e0; color: #424242; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; }
+    .badge-type-thu { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+    .badge-type-chi { background: #ffebee; color: #c62828; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
 
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
     .modal-overlay.active { display: flex; }
@@ -58,17 +58,14 @@
     .segmented button { flex: 1; padding: 8px; border: none; background: #fff; cursor: pointer; font-size: 13px; color: #0288d1; }
     .segmented button.active { background: #0288d1; color: #fff; }
 
-    /* STYLES CHO BIỂU ĐỒ HÌNH TRÒN (DONUT CHART) */
+    /* KHUNG HIỂN THỊ MÃ QR TỰ ĐỘNG TRÊN TRANG TRỦ */
+    .qr-card-box { text-align: center; background: #fff; border-radius: 10px; padding: 12px; margin-top: 10px; border: 1px dashed #a5d6a7; }
+    .qr-card-img { width: 180px; height: 180px; object-fit: contain; margin: 6px auto; display: block; border-radius: 8px; border: 1px solid #eee; }
+
+    /* BIỂU ĐỒ HÌNH TRÒN */
     .progress-chart-container { display: flex; align-items: center; justify-content: space-around; padding: 8px 0; }
-    .donut-chart {
-      width: 100px; height: 100px; border-radius: 50%;
-      background: conic-gradient(#2e7d32 0deg, #e0e0e0 0deg);
-      display: flex; align-items: center; justify-content: center; position: relative;
-    }
-    .donut-chart-center {
-      width: 74px; height: 74px; background: #fff; border-radius: 50%;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-    }
+    .donut-chart { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#2e7d32 0deg, #e0e0e0 0deg); display: flex; align-items: center; justify-content: center; }
+    .donut-chart-center { width: 74px; height: 74px; background: #fff; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .progress-percent { font-size: 18px; font-weight: 700; color: #2e7d32; }
     .progress-label { font-size: 10px; color: #757575; }
     .task-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: #2e7d32; }
@@ -77,7 +74,7 @@
 </head>
 <body>
 
-  <!-- MODAL DÙNG ĐỂ ĐĂNG NHẬP / TẠO NHÓM -->
+  <!-- MODAL ĐĂNG NHẬP / TẠO NHÓM -->
   <div class="modal-overlay active" id="authGroupModal">
     <div class="modal">
       <h3 style="margin-bottom:12px;">Quản Lý Nhóm & Chia Tiền 🔐</h3>
@@ -98,7 +95,6 @@
     </div>
   </div>
 
-  <!-- BỐ CỤC ỨNG DỤNG CHÍNH -->
   <div id="mainApp" style="display:none; flex-direction:column; min-height:100vh;">
 
     <!-- TAB 0: CHIA TIỀN & CÔNG NỢ -->
@@ -116,16 +112,25 @@
           </div>
         </div>
 
-        <!-- Cấu hình Tài khoản Ngân hàng Trưởng nhóm -->
+        <!-- THẺ TÀI KHOẢN NGÂN HÀNG & MÃ VIETQR ĐỘNG -->
         <div class="card" style="background:#f1f8e9; border:1px solid #c8e6c9;">
           <div class="card-title" style="color:#2e7d32;">
             <span><span class="material-icons" style="vertical-align:middle;">account_balance</span> TK Nhận Tiền (Trưởng nhóm)</span>
             <button class="btn btn-outline" style="padding:2px 8px; font-size:10px;" onclick="openModal('bankModal')">Sửa TK</button>
           </div>
           <div id="bankInfoDisplay" style="font-size:12px; color:#333;">Chưa thiết lập số tài khoản nhận tiền</div>
+          
+          <!-- HIỂN THỊ MÃ VIETQR TRỰC TIẾP -->
+          <div id="qrCardBox" class="qr-card-box" style="display:none;">
+            <div style="font-size:11px; font-weight:700; color:#2e7d32;">MÃ VIETQR QUÉT CHUYỂN TIỀN NHANH</div>
+            <img id="mainVietQrImg" class="qr-card-img" src="" alt="Mã VietQR">
+            <button class="btn btn-success" style="padding:4px 12px; font-size:11px; margin-top:4px;" onclick="showVietQR('Thành viên nhóm', 0)">
+              <span class="material-icons" style="font-size:14px;">qr_code_2</span> Mở QR Tùy Chỉnh Số Tiền
+            </button>
+          </div>
         </div>
 
-        <!-- Bảng Tính Công Nợ -->
+        <!-- BẢNG TÍNH CÔNG NỢ -->
         <div class="card">
           <div class="card-title"><span><span class="material-icons" style="color:#0288d1;">payments</span> Bảng Tính Chia Tiền Sòng Phẳng</span></div>
           <div id="debtCalculationList" style="font-size:13px;">Chưa có dữ liệu giao dịch</div>
@@ -147,12 +152,10 @@
       </div>
     </div>
 
-    <!-- TAB 2: CÔNG VIỆC & BIỂU ĐỒ HÌNH TRÒN TIẾN ĐỘ -->
+    <!-- TAB 2: CÔNG VIỆC -->
     <div class="screen" id="screen-task">
       <div class="app-bar"><span>Công Việc & Tiến Độ 📚</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode1"></span></div>
       <div style="flex:1; overflow-y:auto; padding-top: 8px;">
-        
-        <!-- BIỂU ĐỒ TRÒN TIẾN ĐỘ -->
         <div class="card">
           <div class="card-title"><span><span class="material-icons" style="color:#2e7d32; vertical-align:middle;">pie_chart</span> Tiến Độ Hoàn Thành</span></div>
           <div class="progress-chart-container">
@@ -169,28 +172,30 @@
             </div>
           </div>
         </div>
-
-        <!-- DANH SÁCH CÔNG VIỆC -->
         <div id="taskList"></div>
       </div>
       <button class="fab" onclick="openModal('taskModal')"><span class="material-icons">add_task</span> Giao việc</button>
     </div>
 
-    <!-- TAB 3: KHOẢN CHI THU CHI -->
+    <!-- TAB 3: LỊCH SỬ THU & CHI -->
     <div class="screen" id="screen-fund">
-      <div class="app-bar"><span>Lịch Sử Chi Tiêu 💰</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode2"></span></div>
+      <div class="app-bar"><span>Lịch Sử Thu & Chi 💰</span><span class="group-tag" onclick="leaveGroup()" id="displayGroupCode2"></span></div>
       <div style="flex:1; overflow-y:auto; padding: 8px;">
+        <div class="segmented" style="margin:8px 16px;">
+          <button class="active" id="filterAllBtn" onclick="filterFund('all')">Tất cả</button>
+          <button id="filterThuBtn" onclick="filterFund('thu')">Khoản Thu</button>
+          <button id="filterChiBtn" onclick="filterFund('chi')">Khoản Chi</button>
+        </div>
         <div id="fundList"></div>
       </div>
-      <button class="fab" onclick="openModal('fundModal')"><span class="material-icons">add</span> Nhập khoản chi</button>
+      <button class="fab" onclick="openModal('fundModal')"><span class="material-icons">add</span> Nhập Thu / Chi</button>
     </div>
 
-    <!-- MENU ĐIỀU HƯỚNG DƯỚI CÙNG -->
     <nav class="bottom-nav">
       <a class="nav-item active" onclick="switchScreen(0)" id="nav-0"><span class="material-icons">calculate</span>Chia tiền</a>
       <a class="nav-item" onclick="switchScreen(1)" id="nav-1"><span class="material-icons">people</span>Thành viên</a>
       <a class="nav-item" onclick="switchScreen(2)" id="nav-2"><span class="material-icons">task_alt</span>Công việc</a>
-      <a class="nav-item" onclick="switchScreen(3)" id="nav-3"><span class="material-icons">receipt_long</span>Lịch sử chi</a>
+      <a class="nav-item" onclick="switchScreen(3)" id="nav-3"><span class="material-icons">receipt_long</span>Lịch sử Thu/Chi</a>
     </nav>
   </div>
 
@@ -247,28 +252,36 @@
     </div>
   </div>
 
-  <!-- MODAL THÊM KHOẢN CHI -->
+  <!-- MODAL THÊM GIAO DỊCH THU / CHI -->
   <div class="modal-overlay" id="fundModal">
     <div class="modal">
-      <h3>Ghi Nhận Khoản Chi</h3>
-      <div class="input-group"><label>Người đã ứng tiền ra chi</label><select id="fundPayer"></select></div>
-      <div class="input-group"><label>Số tiền chi (VNĐ)</label><input type="number" id="fundAmount" placeholder="0"></div>
-      <div class="input-group"><label>Nội dung chi</label><input type="text" id="fundNote" placeholder="Ví dụ: Mua nước ngọt, In tài liệu"></div>
+      <h3>Ghi Nhận Giao Dịch Thu / Chi</h3>
+      <div class="input-group">
+        <label>Loại giao dịch</label>
+        <select id="fundType">
+          <option value="chi">Chi tiền (Ứng tiền ra chi trả)</option>
+          <option value="thu">Thu tiền (Thành viên nộp quỹ/tiền)</option>
+        </select>
+      </div>
+      <div class="input-group"><label>Thành viên thực hiện</label><select id="fundPayer"></select></div>
+      <div class="input-group"><label>Số tiền (VNĐ)</label><input type="number" id="fundAmount" placeholder="0"></div>
+      <div class="input-group"><label>Nội dung</label><input type="text" id="fundNote" placeholder="Ví dụ: Nộp quỹ nhóm đợt 1 / Mua nước ngọt"></div>
       <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
         <button class="btn btn-outline" onclick="closeModal('fundModal')">Hủy</button>
-        <button class="btn btn-primary" onclick="addFund()">Lưu khoản chi</button>
+        <button class="btn btn-primary" onclick="addFund()">Lưu giao dịch</button>
       </div>
     </div>
   </div>
 
   <script>
     // DÁN ĐÚNG WEB APP URL CỦA EM VÀO DÒNG DƯỚI ĐÂY:
-    const API_URL = 'https://script.google.com/macros/s/AKfycbygg04SjVtmZtHnH7klANf53jli8_LJ15S4f1HdGqL2Luj_iXjuT7jsvpd_mcehSKj3/exec';
+    const API_URL = 'THAY_URL_WEB_APP_CU_A_EM_VAO_DAY';
 
     let groupId = localStorage.getItem('groupId') || '';
     let groupCode = localStorage.getItem('groupCode') || '';
     let tasks = [], members = [], transactions = [];
     let bankConfig = JSON.parse(localStorage.getItem('bankConfig')) || { bank: 'MB', account: '', name: '' };
+    let currentFundFilter = 'all';
 
     window.onload = () => { 
       if (groupId) { 
@@ -305,14 +318,9 @@
       try {
         const res = await fetch(`${API_URL}?action=joinGroup&groupCode=${code}&userId=${encodeURIComponent(userName)}`);
         const data = await res.json();
-        if (data.status === 'success') {
-          saveGroupAndInit(data.group.id, data.group.code);
-        } else {
-          alert(data.message);
-        }
-      } catch (e) {
-        alert('Lỗi kết nối tới Server!');
-      }
+        if (data.status === 'success') saveGroupAndInit(data.group.id, data.group.code);
+        else alert(data.message);
+      } catch (e) { alert('Lỗi kết nối tới Server!'); }
     }
 
     async function handleCreateGroup() {
@@ -327,12 +335,10 @@
         });
         const data = await res.json();
         if (data.status === 'success') { 
-          alert('Tạo nhóm thành công! Mã nhóm của bạn là: ' + data.group.code); 
+          alert('Tạo nhóm thành công! Mã nhóm: ' + data.group.code); 
           saveGroupAndInit(data.group.id, data.group.code); 
         }
-      } catch (e) {
-        alert('Lỗi tạo nhóm!');
-      }
+      } catch (e) { alert('Lỗi tạo nhóm!'); }
     }
 
     function saveGroupAndInit(gId, gCode) {
@@ -368,9 +374,7 @@
             renderBankInfoDisplay();
           }
         }
-      } catch (e) {
-        console.error("Lỗi tải dữ liệu:", e);
-      }
+      } catch (e) { console.error("Lỗi tải dữ liệu:", e); }
       switchScreen(0);
     }
 
@@ -385,10 +389,9 @@
       if (idx === 3) renderFund();
     }
 
-    // --- BẢNG CÔNG NỢ VÀ MÃ QR ---
     function renderDashboardAndDebt() {
       const totalMembers = members.length || 1;
-      const totalChi = transactions.reduce((sum, t) => sum + t.amount, 0);
+      const totalChi = transactions.filter(t => t.type === 'chi').reduce((sum, t) => sum + t.amount, 0);
       const avgSpend = Math.round(totalChi / totalMembers);
 
       document.getElementById('dashTotalSpend').textContent = totalChi.toLocaleString('vi-VN') + ' đ';
@@ -398,7 +401,8 @@
       members.forEach(m => memberPaidMap[m.id] = 0);
       transactions.forEach(t => {
         if (t.payerId && memberPaidMap[t.payerId] !== undefined) {
-          memberPaidMap[t.payerId] += t.amount;
+          if (t.type === 'chi') memberPaidMap[t.payerId] += t.amount;
+          if (t.type === 'thu') memberPaidMap[t.payerId] += t.amount;
         }
       });
 
@@ -417,7 +421,7 @@
           actionUI = `<div style="text-align:right;">
             <div class="debt-pay">Cần nộp: ${oweAmount.toLocaleString('vi-VN')} đ</div>
             <button class="btn btn-success" style="padding:4px 8px; font-size:11px; margin-top:4px;" onclick="showVietQR('${m.name}', ${oweAmount})">
-              <span class="material-icons" style="font-size:14px;">qr_code_2</span> Chuyển khoản (QR)
+              <span class="material-icons" style="font-size:14px;">qr_code_2</span> Quét VietQR
             </button>
           </div>`;
         } else {
@@ -427,7 +431,7 @@
         return `<div class="debt-item">
           <div>
             <strong style="font-size:14px;">${m.name} ${m.role==='admin'?'⭐️':''}</strong>
-            <div style="font-size:11px; color:#757575;">Đã ứng chi: ${paid.toLocaleString('vi-VN')} đ</div>
+            <div style="font-size:11px; color:#757575;">Đã đóng/ứng: ${paid.toLocaleString('vi-VN')} đ</div>
           </div>
           ${actionUI}
         </div>`;
@@ -450,10 +454,17 @@
 
     function renderBankInfoDisplay() {
       const el = document.getElementById('bankInfoDisplay');
+      const qrBox = document.getElementById('qrCardBox');
+      const qrImg = document.getElementById('mainVietQrImg');
+
       if (bankConfig.account) {
         el.innerHTML = `<strong>${bankConfig.bank}</strong> - STK: <strong>${bankConfig.account}</strong><br>Chủ TK: <strong>${bankConfig.name}</strong>`;
+        const defaultMemo = `${groupCode}%20NOP%20TIEN`;
+        qrImg.src = `https://img.vietqr.io/image/${bankConfig.bank}-${bankConfig.account}-compact2.png?addInfo=${defaultMemo}&accountName=${encodeURIComponent(bankConfig.name)}`;
+        qrBox.style.display = 'block';
       } else {
         el.innerHTML = 'Chưa thiết lập số tài khoản nhận tiền. Bấm <strong>"Sửa TK"</strong> để cài đặt.';
+        qrBox.style.display = 'none';
       }
     }
 
@@ -469,30 +480,26 @@
       document.getElementById('qrPayerName').textContent = `Thành viên: ${payerName}`;
       document.getElementById('qrImage').src = qrUrl;
       document.getElementById('qrDetails').innerHTML = `
-        Số tiền: <strong style="color:#d32f2f; font-size:15px;">${amount.toLocaleString('vi-VN')} đ</strong><br>
+        Số tiền: <strong style="color:#2e7d32; font-size:15px;">${amount ? amount.toLocaleString('vi-VN') + ' đ' : 'Nhập tùy ý khi quét'}</strong><br>
         Nội dung: <strong>${groupCode} ${payerName} NOP TIEN</strong><br>
         Ngân hàng: <strong>${bankConfig.bank} - ${bankConfig.account}</strong>
       `;
       openModal('qrModal');
     }
 
-    // --- QUẢN LÝ CÔNG VIỆC VÀ BIỂU ĐỒ HÌNH TRÒN TIẾN ĐỘ ---
     function renderTasks() {
       const total = tasks.length;
       const doneCount = tasks.filter(t => t.status === 'done').length;
       const pendingCount = total - doneCount;
       const percent = total > 0 ? Math.round((doneCount / total) * 100) : 0;
 
-      // Cập nhật giao diện Biểu đồ tròn Donut
       document.getElementById('taskPercentText').textContent = percent + '%';
       document.getElementById('tasksDoneCount').textContent = doneCount;
       document.getElementById('tasksPendingCount').textContent = pendingCount;
       document.getElementById('tasksTotalCount').textContent = total;
 
-      const donutChart = document.getElementById('taskDonutChart');
-      donutChart.style.background = `conic-gradient(#2e7d32 0deg ${percent * 3.6}deg, #e0e0e0 ${percent * 3.6}deg 360deg)`;
+      document.getElementById('taskDonutChart').style.background = `conic-gradient(#2e7d32 0deg ${percent * 3.6}deg, #e0e0e0 ${percent * 3.6}deg 360deg)`;
 
-      // Danh sách công việc
       const list = document.getElementById('taskList');
       if (!total) return list.innerHTML = '<div style="text-align:center; padding:32px; color:#999;">Chưa có công việc nào</div>';
       
@@ -503,10 +510,10 @@
             <input type="checkbox" class="task-checkbox" ${isDone ? 'checked' : ''} onchange="toggleTaskStatus('${t.id}', this.checked)">
             <div>
               <div class="title ${isDone ? 'task-done-title' : ''}">${t.title}</div>
-              <div class="subtitle">Làm: <strong>${t.assigneeName || 'Chưa gán'}</strong> | Hạn: ${new Date(t.deadline).toLocaleString('vi-VN')}</div>
+              <div class="subtitle">Làm: <strong>${t.assigneeName || 'Chưa gán'}</strong></div>
             </div>
           </div>
-          <div>${isDone ? '<span class="badge-role-admin" style="background:#2e7d32;">Xong</span>' : '<span class="badge-role-member">Đang làm</span>'}</div>
+          <div>${isDone ? '<span class="badge-type-thu">Xong</span>' : '<span class="badge-type-chi">Đang làm</span>'}</div>
         </div>`;
       }).join('');
     }
@@ -524,21 +531,17 @@
       const container = document.getElementById('membersList');
       if (!members.length) return container.innerHTML = '<div style="text-align:center; padding:32px; color:#999;">Chưa có thành viên</div>';
 
-      container.innerHTML = members.map(m => {
-        const isAdmin = m.role === 'admin';
-        return `<div class="list-item">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:36px; height:36px; border-radius:50%; background:${isAdmin?'#fff3e0':'#e1f5fe'}; color:${isAdmin?'#e65100':'#0288d1'}; display:flex; align-items:center; justify-content:center; font-weight:700;">
-              ${(m.name || 'U').charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <div class="title">${m.name}</div>
-              <div class="subtitle">${isAdmin ? 'Trưởng nhóm' : 'Thành viên'}</div>
-            </div>
+      container.innerHTML = members.map(m => `<div class="list-item">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:36px; height:36px; border-radius:50%; background:#e1f5fe; color:#0288d1; display:flex; align-items:center; justify-content:center; font-weight:700;">
+            ${(m.name || 'U').charAt(0).toUpperCase()}
           </div>
-          <div>${isAdmin ? '<span class="badge-role-admin">Leader</span>' : '<span class="badge-role-member">Member</span>'}</div>
-        </div>`;
-      }).join('');
+          <div>
+            <div class="title">${m.name}</div>
+            <div class="subtitle">${m.role === 'admin' ? 'Trưởng nhóm' : 'Thành viên'}</div>
+          </div>
+        </div>
+      </div>`).join('');
     }
 
     function copyGroupCode() {
@@ -546,16 +549,35 @@
       alert('Đã sao chép mã nhóm: ' + groupCode);
     }
 
+    function filterFund(type) {
+      currentFundFilter = type;
+      document.getElementById('filterAllBtn').classList.toggle('active', type === 'all');
+      document.getElementById('filterThuBtn').classList.toggle('active', type === 'thu');
+      document.getElementById('filterChiBtn').classList.toggle('active', type === 'chi');
+      renderFund();
+    }
+
     function renderFund() {
-      document.getElementById('fundList').innerHTML = transactions.map(t => `<div class="list-item">
-        <div>
-          <div class="title">${t.note}</div>
-          <div class="subtitle">Chi bởi: <strong>${t.payerName || 'Chưa rõ'}</strong></div>
-        </div>
-        <div style="font-weight:700; color:#d32f2f;">
-          -${t.amount.toLocaleString('vi-VN')} đ
-        </div>
-      </div>`).join('') || '<div style="text-align:center; padding:32px; color:#999;">Chưa có khoản chi nào</div>';
+      const list = document.getElementById('fundList');
+      const filtered = transactions.filter(t => currentFundFilter === 'all' || t.type === currentFundFilter);
+
+      if (!filtered.length) return list.innerHTML = '<div style="text-align:center; padding:32px; color:#999;">Chưa có lịch sử thu chi</div>';
+
+      list.innerHTML = filtered.map(t => {
+        const isThu = t.type === 'thu';
+        return `<div class="list-item">
+          <div>
+            <div class="title" style="display:flex; align-items:center; gap:6px;">
+              <span class="${isThu ? 'badge-type-thu' : 'badge-type-chi'}">${isThu ? 'THU' : 'CHI'}</span>
+              ${t.note}
+            </div>
+            <div class="subtitle">${isThu ? 'Thành viên nộp:' : 'Người ứng chi:'} <strong>${t.payerName || 'Chưa rõ'}</strong></div>
+          </div>
+          <div style="font-weight:700; color:${isThu ? '#2e7d32' : '#d32f2f'};">
+            ${isThu ? '+' : '-'}${t.amount.toLocaleString('vi-VN')} đ
+          </div>
+        </div>`;
+      }).join('');
     }
 
     function openModal(id) {
@@ -596,13 +618,14 @@
     }
 
     async function addFund() {
+      const type = document.getElementById('fundType').value;
       const amt = parseFloat(document.getElementById('fundAmount').value) || 0;
       const note = document.getElementById('fundNote').value.trim();
       const payerId = document.getElementById('fundPayer').value;
       const payerName = members.find(m => m.id === payerId)?.name || '';
       if (!amt || !note) return alert('Vui lòng nhập đủ số tiền và nội dung!');
       
-      const t = { id: 'tr_' + Date.now(), type: 'chi', amount: amt, note, payerId, payerName };
+      const t = { id: 'tr_' + Date.now(), type, amount: amt, note, payerId, payerName };
       transactions.push(t); 
       closeModal('fundModal'); 
       renderFund(); 
