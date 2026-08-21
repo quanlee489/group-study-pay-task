@@ -24,7 +24,6 @@
     .card { background: #fff; border-radius: 12px; padding: 16px; margin: 8px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     .card-title { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
     
-    /* DASHBOARD TỔNG QUAN CẢNH BÁO */
     .dashboard-overview-card { background: linear-gradient(135deg, #0288d1, #01579b); color: #fff; border-radius: 14px; padding: 16px; margin: 12px 16px 4px 16px; box-shadow: 0 4px 12px rgba(2,136,209,0.3); }
     .dash-header-title { font-size: 18px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .dash-alert-box { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px); padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; margin-top: 10px; }
@@ -42,6 +41,7 @@
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border: none; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; }
     .btn-primary { background: #0288d1; color: #fff; }
     .btn-success { background: #2e7d32; color: #fff; }
+    .btn-danger { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
     .btn-outline { background: transparent; border: 1px solid #0288d1; color: #0288d1; }
     .btn-full { width: 100%; padding: 12px; font-size: 14px; }
     
@@ -54,7 +54,6 @@
     .debt-receive { color: #2e7d32; font-weight: 700; font-size: 13px; }
     .debt-pay { color: #d32f2f; font-weight: 700; font-size: 13px; }
     
-    /* BADGE TRẠNG THÁI CÔNG VIỆC VA THU CHI */
     .badge-status-doing { background: #e3f2fd; color: #0288d1; padding: 4px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
     .badge-status-done { background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
     .badge-status-late { background: #ffebee; color: #c62828; padding: 4px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
@@ -78,6 +77,8 @@
     .progress-percent { font-size: 18px; font-weight: 700; color: #2e7d32; }
     .progress-label { font-size: 10px; color: #757575; }
     .task-select-status { padding: 4px 6px; border-radius: 6px; border: 1px solid #ccc; font-size: 11px; font-weight: 700; outline: none; }
+    .btn-delete-icon { background: none; border: none; color: #e53935; cursor: pointer; padding: 4px; display: flex; align-items: center; border-radius: 50%; }
+    .btn-delete-icon:hover { background: #ffebee; }
   </style>
 </head>
 <body>
@@ -296,7 +297,7 @@
 
   <script>
     // DÁN ĐÚNG WEB APP URL CỦA EM VÀO DÒNG DƯỚI ĐÂY:
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxGgq0K3EzXXv5d5goR3akfEktGJQss4JSSJLqSl6PiNGJvRzg4X2PIY26uZoibO8OWLg/exec';
+    const API_URL = 'THAY_URL_WEB_APP_CU_A_EM_VAO_DAY';
 
     let groupId = localStorage.getItem('groupId') || '';
     let groupCode = localStorage.getItem('groupCode') || '';
@@ -391,7 +392,7 @@
         if (data.status === 'success') {
           tasks = data.tasks || [];
           members = data.members || [];
-          transactions = (data.transactions || []).map(t => ({...t, amount: Number(t.amount)||0}));
+          transactions = (data.transactions || []).map(t => ({...t, amount: Number(t.amount)||0, status: t.status || 'active'}));
           if (data.groupName) { groupName = data.groupName; localStorage.setItem('groupName', groupName); }
           if (data.groupCode) updateGroupCodeUI(data.groupCode);
           if (data.bankConfig) {
@@ -415,7 +416,6 @@
       if (idx === 3) renderFund();
     }
 
-    // TÍNH TOÁN CÔNG VIỆC TRỄ HẠN ĐỘNG VÀ UPDATE DASHBOARD
     function processTaskStatuses() {
       const now = new Date();
       let pendingOrLateCount = 0;
@@ -457,8 +457,11 @@
         alertText.textContent = '🎉 Tất cả công việc đã hoàn thành xuất sắc!';
       }
 
+      // CHỈ TÍNH CÁC GIAO DỊCH ACTIVE (BỎ QUA CÁC GIAO DỊCH ĐÃ XÓA/ẨN)
+      const activeTransactions = transactions.filter(t => t.status !== 'deleted');
+
       const totalMembers = members.length || 1;
-      const totalChi = transactions.filter(t => t.type === 'chi').reduce((sum, t) => sum + t.amount, 0);
+      const totalChi = activeTransactions.filter(t => t.type === 'chi').reduce((sum, t) => sum + t.amount, 0);
       const avgSpend = Math.round(totalChi / totalMembers);
 
       document.getElementById('dashTotalSpend').textContent = totalChi.toLocaleString('vi-VN') + ' đ';
@@ -466,7 +469,7 @@
 
       const memberPaidMap = {};
       members.forEach(m => memberPaidMap[m.id] = 0);
-      transactions.forEach(t => {
+      activeTransactions.forEach(t => {
         if (t.payerId && memberPaidMap[t.payerId] !== undefined) {
           memberPaidMap[t.payerId] += t.amount;
         }
@@ -635,7 +638,9 @@
 
     function renderFund() {
       const list = document.getElementById('fundList');
-      const filtered = transactions.filter(t => currentFundFilter === 'all' || t.type === currentFundFilter);
+      // CHỈ HIỆN CÁC GIAO DỊCH CHƯA ẨN (status !== 'deleted')
+      const activeTransactions = transactions.filter(t => t.status !== 'deleted');
+      const filtered = activeTransactions.filter(t => currentFundFilter === 'all' || t.type === currentFundFilter);
 
       if (!filtered.length) return list.innerHTML = '<div style="text-align:center; padding:32px; color:#999;">Chưa có lịch sử thu chi</div>';
 
@@ -649,11 +654,29 @@
             </div>
             <div class="subtitle">${isThu ? 'Thành viên nộp:' : 'Người ứng chi:'} <strong>${t.payerName || 'Chưa rõ'}</strong></div>
           </div>
-          <div style="font-weight:700; color:${isThu ? '#2e7d32' : '#d32f2f'};">
-            ${isThu ? '+' : '-'}${t.amount.toLocaleString('vi-VN')} đ
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="font-weight:700; color:${isThu ? '#2e7d32' : '#d32f2f'};">
+              ${isThu ? '+' : '-'}${t.amount.toLocaleString('vi-VN')} đ
+            </div>
+            <button class="btn-delete-icon" title="Xóa/Ẩn khoản này" onclick="deleteTransaction('${t.id}')">
+              <span class="material-icons" style="font-size:18px;">delete_outline</span>
+            </button>
           </div>
         </div>`;
       }).join('');
+    }
+
+    // HÀM XÓA/ẨN GIAO DỊCH
+    function deleteTransaction(transactionId) {
+      if (confirm('Bạn có chắc muốn xóa/ẩn khoản này khỏi danh sách tính tiền? (Dữ liệu vẫn được giữ nguyên trên Google Sheet backend)')) {
+        const target = transactions.find(t => t.id === transactionId);
+        if (target) {
+          target.status = 'deleted';
+          renderFund();
+          renderDashboardAndDebt();
+          apiCall({ action: 'deleteTransaction', transactionId: transactionId });
+        }
+      }
     }
 
     function openModal(id) {
@@ -702,7 +725,7 @@
       const payerName = members.find(m => m.id === payerId)?.name || '';
       if (!amt || !note) return alert('Vui lòng nhập đủ số tiền và nội dung!');
       
-      const t = { id: 'tr_' + Date.now(), type, amount: amt, note, payerId, payerName };
+      const t = { id: 'tr_' + Date.now(), type, amount: amt, note, payerId, payerName, status: 'active' };
       transactions.push(t); 
       closeModal('fundModal'); 
       renderFund(); 
