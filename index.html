@@ -180,7 +180,7 @@
           </div>
         </div>
 
-        <!-- THANH LỌC TASK MỚI -->
+        <!-- THANH LỌC TASK -->
         <div class="segmented" style="margin: 8px 16px;">
           <button class="active" id="filterTaskActiveBtn" onclick="filterTask('active')">Đang làm / Trễ</button>
           <button id="filterTaskDoneBtn" onclick="filterTask('done')">Đã xong (Ẩn)</button>
@@ -286,7 +286,7 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwYGvfBeUyw3fLNHFs9_J9Pk3xrnVMxeHD8WWoCDNxZjD6EGpgPlV2Emgpu1bvGRaIrnA/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxj3w5zYtAQZOka9e5gCGePDaS6jhwa5Zn4kHJp5c54kd_JoO6duMcv_xEc2QTkWBBHtg/exec';
 
     let groupId = localStorage.getItem('groupId') || '';
     let groupCode = localStorage.getItem('groupCode') || '';
@@ -296,7 +296,7 @@
     let transactions = JSON.parse(localStorage.getItem('cachedFund')) || [];
     let bankConfig = JSON.parse(localStorage.getItem('bankConfig')) || { bank: 'MB', account: '', name: '' };
     let currentFundFilter = 'all';
-    let currentTaskFilter = 'active'; // 'active' (ẩn done), 'done', 'all'
+    let currentTaskFilter = 'active';
 
     window.onload = () => {
       if (groupId) {
@@ -388,11 +388,17 @@
         const res = await fetch(`${API_URL}?action=getGroupData&groupId=${groupId}`);
         const data = await res.json();
         if (data.status === 'success') {
+          // Khớp ID Nhóm, Mã Nhóm, Tên Nhóm từ JSON trả về
+          if (data.groupId) { groupId = data.groupId; localStorage.setItem('groupId', groupId); }
+          if (data.groupCode) updateGroupCodeUI(data.groupCode);
+          if (data.groupName) { groupName = data.groupName; localStorage.setItem('groupName', groupName); }
+
+          // Khớp danh sách Task, Members, Transactions từ JSON
           tasks = (data.tasks || []).filter(t => t.status !== 'deleted');
           members = data.members || [];
           transactions = (data.transactions || []).map(t => ({...t, amount: Number(t.amount)||0, status: t.status || 'active'}));
-          if (data.groupName) { groupName = data.groupName; localStorage.setItem('groupName', groupName); }
-          if (data.groupCode) updateGroupCodeUI(data.groupCode);
+          
+          // Khớp Cấu hình ngân hàng từ JSON
           if (data.bankConfig) {
             bankConfig = data.bankConfig;
             localStorage.setItem('bankConfig', JSON.stringify(bankConfig));
@@ -460,17 +466,26 @@
       document.getElementById('dashTotalSpend').textContent = totalChi.toLocaleString('vi-VN') + ' đ';
       document.getElementById('dashAvgSpend').textContent = avgSpend.toLocaleString('vi-VN') + ' đ';
 
+      // Tính toán dựa trên payerName hoặc payerId từ JSON
       const memberPaidMap = {};
-      members.forEach(m => memberPaidMap[m.id] = 0);
+      members.forEach(m => {
+        memberPaidMap[m.id] = 0;
+        if (m.name) memberPaidMap[m.name] = 0;
+      });
+
       activeTransactions.forEach(t => {
-        if (t.payerId && memberPaidMap[t.payerId] !== undefined) memberPaidMap[t.payerId] += t.amount;
+        if (t.payerId && memberPaidMap[t.payerId] !== undefined) {
+          memberPaidMap[t.payerId] += t.amount;
+        } else if (t.payerName && memberPaidMap[t.payerName] !== undefined) {
+          memberPaidMap[t.payerName] += t.amount;
+        }
       });
 
       const container = document.getElementById('debtCalculationList');
       if (!members.length) return container.innerHTML = 'Chưa có dữ liệu thành viên';
 
       container.innerHTML = members.map(m => {
-        const paid = memberPaidMap[m.id] || 0;
+        const paid = memberPaidMap[m.id] || memberPaidMap[m.name] || 0;
         const diff = paid - avgSpend;
         let actionUI = '';
 
@@ -527,7 +542,6 @@
       document.getElementById('tasksLateCount').textContent = lateCount;
       document.getElementById('taskDonutChart').style.background = `conic-gradient(#2e7d32 0deg ${percent * 3.6}deg, #e0e0e0 ${percent * 3.6}deg 360deg)`;
 
-      // Áp dụng bộ lọc Task
       const filteredTasks = activeTasksList.filter(t => {
         const st = t.calculatedStatus;
         if (currentTaskFilter === 'active') return st === 'doing' || st === 'late';
