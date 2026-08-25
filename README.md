@@ -21,7 +21,8 @@ Các tính năng chính:
 
 3. ĐƯỜNG LINK TRẢI NGHIỆM TRỰC TUYẾN
 - Link Web App: https://quanlee489.github.io/group-study-pay-task/
-- Mã nhóm trải nghiệm nhanh: S7942D
+- Link Trang tính Google Sheets (Database & Backend): https://docs.google.com/spreadsheets/d/1kEVlOS2rS7-YrkVXeCvX7R8y50CtvYLqWfG0Pu-Pqcc/edit?usp=sharing
+- - Mã nhóm trải nghiệm nhanh: S7942D
 
 4. CÔNG NGHỆ SỬ DỤNG
 - Frontend: HTML5, CSS3, JavaScript (ES6), Material Icons.
