@@ -37,8 +37,8 @@ Các tính năng chính:
 - README.txt      : File hướng dẫn và thông tin dự án.
 
 6. HƯỚNG DẪN KHỞI CHẠY (DÀNH CHO GIÁM KHẢO)
-- Cách 1 (Nhanh nhất): Bấm trực tiếp vào Đường link trải nghiệm trực tuyến ở Mục 3 bằng trình duyệt Chrome/Safari trên điện thoại hoặc máy tính.
-- Cách 2 (Chạy local): Giải nén thư mục dự án -> Nhấp đôi chuột vào file `index.html` để mở và sử dụng trực tiếp trên trình duyệt web mà không cần cài đặt phần mềm phụ trợ.
+- Cách 1: Bấm trực tiếp vào Đường link trải nghiệm trực tuyến ở Mục 3 bằng trình duyệt Chrome/Safari trên điện thoại hoặc máy tính.
+- Cách 2: Giải nén thư mục dự án -> Nhấp đôi chuột vào file `index.html` để mở và sử dụng trực tiếp trên trình duyệt web mà không cần cài đặt phần mềm phụ trợ.
 
 ========================================================================
 Cảm ơn Ban Giám khảo đã xem xét sản phẩm dự thi của chúng em!
